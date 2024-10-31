@@ -1408,7 +1408,7 @@
             }
           }
           if (product.casePowerSupply) {
-  document.getElementById('productPowerSupplyWatt').innerHTML = `<strong>Power Supply Watt (W):</strong> ${product.casePowerWatt}`;
+    document.getElementById('productPowerSupplyWatt').innerHTML = `<strong>Power Supply Watt (W):</strong> ${product.casePowerWatt}`;
   document.getElementById('productPowerSupplyWatt').style.display = 'block';
 } else {
   document.getElementById('productPowerSupplyWatt').style.display = 'none';
@@ -1471,7 +1471,7 @@
                 </div>`;
             });
           } else {
-            // Eğer resim yoksa varsayılan bir resim ekleyebilirsiniz
+            // Eğer resim yoksa varsayılan bir resim 
             carouselImages.innerHTML = `
               <div class="carousel-item active">
                 <img src="default-image.jpg" class="d-block w-100" alt="Default Image">
