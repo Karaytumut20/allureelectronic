@@ -1,0 +1,829 @@
+<!doctype html>
+<html lang="tr">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ürün Listesi</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Favicon -->
+  <link rel="shortcut icon" type="image/png" href="favicon.png" />
+  <!-- Custom Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+
+  <!-- Firebase Configuration and Scripts -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    // Firebase yapılandırma ayarları
+    const firebaseConfig = {
+      apiKey: "AIzaSyCYOOa5J3U6k_kVM721xF7LCoxWY6EsE7Q",
+      authDomain: "electronic-b4925.firebaseapp.com",
+      projectId: "electronic-b4925",
+      storageBucket: "electronic-b4925.appspot.com",
+      messagingSenderId: "904593171488",
+      appId: "1:904593171488:web:3a8f5967cad2bd7bbac845",
+      measurementId: "G-BSXFE5FHJV"
+    };
+
+    // Firebase uygulamasını başlatma
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Sadece "İkinci El" olan ürünleri depolamak için dizi
+    let secondHandProducts = [];
+
+    /**
+     * Firebase'den sadece "İkinci El" ürünleri çekip sayfaya ekleyen fonksiyon
+     */
+    async function fetchProducts() {
+      const productsCollection = collection(db, "products");
+      const q = query(productsCollection, where("isSecondHand", "==", true)); // Sadece isSecondHand=true olanları çek
+      const querySnapshot = await getDocs(q);
+      const productsContainer = document.getElementById("productsTableBody");
+      productsContainer.innerHTML = ''; // Mevcut ürünleri temizle
+
+      secondHandProducts = []; // Ürünler dizisini sıfırla
+
+      querySnapshot.forEach((doc) => {
+        const product = doc.data();
+        const productName = product.name || "Bilinmeyen Ürün";
+        const productPrice = product.price ? `${product.price}₺` : "Fiyat Bilinmiyor";
+        const productCategory = product.category || "Kategori: Bilinmiyor";
+        const imageUrls = product.image_urls || [];
+        const productPeripheral = product.peripheral;
+
+        // Ürün verilerini içeren obje
+        let productObj = {
+          name: productName.toLowerCase(),
+          category: productCategory.toLowerCase(),
+          html:
+            `<div class="col-lg-3 col-md-4 col-sm-6 mb-4 d-flex align-items-stretch">
+              <div class="card h-100 shadow-sm product-card border-0">
+                <a href="urunDetay.html?id=${doc.id}" class="text-decoration-none text-dark">
+                  <div class="position-relative">
+                    <img src="${imageUrls[0] || 'default-image.jpg'}" class="card-img-top rounded-top" alt="${productName}" style="height: 200px; object-fit: contain;">
+                    ${
+                      productPeripheral
+                        ? `<span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">${productPeripheral}</span>`
+                        : `<span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">${productCategory}</span>`
+                    }
+                  </div>
+                  <div class="card-body d-flex flex-column">
+                    <h5 class="card-title fw-bold">${productName}</h5>
+                    <p class="card-text text-muted mb-2">${productCategory}</p>
+                    <div class="mt-auto">
+                      <p class="card-text fs-5 text-danger">${productPrice}</p>
+                      <button class="btn btn-outline-warning w-100">
+                        Detayları Gör <i class="fas fa-arrow-right ms-2"></i>
+                      </button>
+                    </div>
+                  </div>
+                </a>
+              </div>
+            </div>`
+        };
+
+        // Ürünü tüm ürünler listesine ekle
+        secondHandProducts.push(productObj);
+        productsContainer.innerHTML += productObj.html;
+      });
+
+      // Carousel hover efekti ekle
+      addCarouselHoverEffect();
+    }
+
+    /**
+     * Ürünleri arama terimine göre filtreleyen fonksiyon
+     */
+    function filterProducts() {
+      const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+      const filteredProducts = secondHandProducts.filter(product =>
+        product.name.includes(searchTerm) || product.category.includes(searchTerm)
+      );
+
+      const productsContainer = document.getElementById("productsTableBody");
+      productsContainer.innerHTML = ''; // Mevcut ürünleri temizle
+
+      filteredProducts.forEach(product => {
+        productsContainer.innerHTML += product.html;
+      });
+
+      // Carousel hover efekti ekle
+      addCarouselHoverEffect();
+    }
+
+    /**
+     * Carousel hover efektini ekleyen fonksiyon
+     */
+    function addCarouselHoverEffect() {
+      document.querySelectorAll('.carousel').forEach(carousel => {
+        let carouselInstance = new bootstrap.Carousel(carousel, {
+          interval: false,
+          ride: false
+        });
+
+        let hoverInterval;
+
+        const cardElement = carousel.closest('.product-card');
+        if (cardElement) {
+          cardElement.addEventListener('mouseenter', () => {
+            if (!hoverInterval) {
+              hoverInterval = setInterval(() => {
+                carouselInstance.next();
+              }, 2000);
+            }
+          });
+
+          cardElement.addEventListener('mouseleave', () => {
+            if (hoverInterval) {
+              clearInterval(hoverInterval);
+              hoverInterval = null;
+            }
+            carouselInstance.to(0);
+          });
+        }
+
+        carousel.querySelectorAll('.carousel-indicators button').forEach((indicator, index) => {
+          indicator.addEventListener('mouseenter', () => {
+            carouselInstance.to(index);
+          });
+        });
+      });
+    }
+
+    /**
+     * Ekran boyutuna göre placeholder metnini ayarlayan fonksiyon
+     */
+    function adjustPlaceholder() {
+      const searchInput = document.getElementById("searchInput");
+      const width = window.innerWidth;
+
+      if (width >= 1600) {
+        searchInput.placeholder = "Aramak istediğiniz ürünü giriniz...";
+      } else if (width >= 1200) {
+        searchInput.placeholder = "Aramak istediğiniz ürünü giriniz...";
+      } else if (width >= 768) {
+        searchInput.placeholder = "Ürün Ara...";
+      } else {
+        searchInput.placeholder = "Ara...";
+      }
+    }
+
+    // Sayfa yüklendiğinde çalışacak fonksiyonlar
+    window.onload = function () {
+      fetchProducts(); // Ürünleri çek
+      document.getElementById("searchInput").addEventListener("input", filterProducts); // Arama çubuğu olayını dinle
+      adjustPlaceholder(); // Placeholder metnini ayarla
+      window.addEventListener('resize', adjustPlaceholder); // Ekran boyutu değiştiğinde placeholder'ı ayarla
+    }
+  </script>
+
+  <style>
+    /* Genel Gövde ve Navbar Font Ayarları */
+    body,
+    .navbar,
+    .navbar-brand,
+    .navbar-nav .nav-link {
+      font-family: 'Poppins', sans-serif;
+    }
+
+    /* Navbar bağlantılarının temel rengi */
+    .navbar-nav .nav-link {
+      color: white !important;
+    }
+
+    /* Navbar bağlantılarının hover rengi (sadece belirli ekran boyutlarında) */
+    @media (min-width: 576px) {
+      .navbar-nav .nav-link:hover {
+        color: #ffffff !important;
+        background-color: #b18232;
+      }
+
+      /* Dropdown menü öğelerinin hover rengi */
+      .navbar-nav .dropdown:hover .dropdown-menu {
+        display: block;
+      }
+
+      .offcanvas-body .dropdown:hover .dropdown-menu {
+        display: block;
+      }
+    }
+
+    /* Dropdown menü öğelerinin temel rengi */
+    .dropdown-menu {
+      background-color: #f3ad35;
+    }
+
+    .dropdown-menu .dropdown-item {
+      color: white;
+    }
+
+    /* Dropdown menü öğelerinin hover rengi */
+    .dropdown-menu .dropdown-item:hover {
+      color: #FFFFFF !important;
+      background-color: #b18232;
+    }
+
+    /* Offcanvas (sidebar) için renk ayarları */
+    .offcanvas {
+      background-color: #f36835;
+      color: white;
+    }
+
+    .offcanvas .offcanvas-header,
+    .offcanvas .offcanvas-title {
+      color: white;
+    }
+
+    .offcanvas-body .nav-link {
+      color: white;
+    }
+
+    .offcanvas-body .nav-link:hover {
+      color: #FFD700 !important;
+      background-color: #6c757d;
+    }
+
+    /* Diğer CSS kuralları */
+    .offcanvas-start {
+      width: 250px;
+    }
+
+    .offcanvas-body {
+      padding: 1rem;
+    }
+
+    .card {
+      width: 100%;
+      height: 100%;
+    }
+
+    .carousel-item img {
+      object-fit: cover;
+      height: 200px;
+      border-radius: 10px 10px 0 0;
+    }
+
+    .carousel-item {
+      transition: none !important;
+    }
+
+    .mb-4 {
+      margin-bottom: 30px;
+    }
+
+    /* Ürün kartının hover efekti */
+    .product-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .product-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      color: #333;
+    }
+
+    .card-text.text-muted {
+      font-size: 1rem;
+      color: #777;
+    }
+
+    .card-text.fs-5 {
+      font-size: 1.25rem;
+      font-weight: bold;
+    }
+
+    .card-body {
+      background: linear-gradient(135deg, #f5f5f5, #ffffff);
+      border-top: 1px solid #d9d9d9;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Arama Çubuğu Konteyneri */
+    .search-bar-container {
+      position: relative;
+      margin: 0 auto; /* Ortalamak için */
+      width: 100%; /* Genişliği %100 yap */
+      max-width: 600px; /* Maksimum genişlik */
+      transition: max-width 0.3s ease; /* Genişlik değişim animasyonu */
+    }
+
+    /* Medya Sorguları ile Genişlik Ayarları */
+    @media (max-width: 1600px) {
+      .search-bar-container {
+        max-width: 580px;
+      }
+    }
+
+    @media (max-width: 1500px) {
+      .search-bar-container {
+        max-width: 560px;
+      }
+    }
+
+    @media (max-width: 1400px) {
+      .search-bar-container {
+        max-width: 540px;
+      }
+    }
+
+    @media (max-width: 1300px) {
+      .search-bar-container {
+        max-width: 520px;
+      }
+    }
+
+    @media (max-width: 1200px) {
+      .search-bar-container {
+        max-width: 500px;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      .search-bar-container {
+        max-width: 480px;
+      }
+    }
+
+    @media (max-width: 1000px) {
+      .search-bar-container {
+        max-width: 460px;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .search-bar-container {
+        max-width: 440px;
+      }
+    }
+
+    @media (max-width: 800px) {
+      .search-bar-container {
+        max-width: 420px;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .search-bar-container {
+        max-width: 400px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .search-bar-container {
+        max-width: 380px;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .search-bar-container {
+        max-width: 360px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .search-bar-container {
+        max-width: 340px;
+      }
+    }
+
+    @media (max-width: 340px) {
+      .search-bar-container {
+        max-width: 320px;
+      }
+    }
+
+    /* Arama Çubuğu Girişi */
+    .search-bar {
+      width: 100%; /* Genişliği %100 yap */
+      border-radius: 25px;
+      padding: 10px 50px 10px 20px; /* Üst, sağ, alt, sol */
+      height: 50px; /* Varsayılan yükseklik */
+      border: 1px solid #ced4da;
+      transition: height 0.3s ease, font-size 0.3s ease, padding 0.3s ease; /* Yükseklik, font boyutu ve padding değişim animasyonu */
+      font-size: 16px;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Arama Barı İkonu */
+    .search-bar-icon {
+      position: absolute;
+      right: 20px; /* İkona sağdan boşluk */
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.2rem;
+      color: #6c757d;
+      pointer-events: none; /* İkonun tıklanmasını engeller */
+      transition: color 0.3s ease, transform 0.3s ease;
+    }
+
+    .search-bar:focus + .search-bar-icon {
+      color: #f36835;
+      transform: translateY(-50%) scale(1.2);
+    }
+
+    /* Medya Sorguları ile Yükseklik ve Font Boyutu Ayarları */
+
+    /* Çok Büyük Ekranlar (1600px ve üstü) */
+    @media (min-width: 1600px) {
+      .search-bar {
+        height: 60px;
+        font-size: 20px;
+        padding: 12px 55px 12px 25px;
+      }
+
+      .search-bar-icon {
+        font-size: 1.4rem;
+      }
+    }
+
+    /* Büyük Ekranlar (1200px - 1599px) */
+    @media (min-width: 1200px) and (max-width: 1599px) {
+      .search-bar {
+        height: 55px;
+        font-size: 19px;
+        padding: 11px 52px 11px 22px;
+      }
+
+      .search-bar-icon {
+        font-size: 1.3rem;
+      }
+    }
+
+    /* Orta Büyük Ekranlar (992px - 1199px) */
+    @media (min-width: 992px) and (max-width: 1199px) {
+      .search-bar {
+        height: 50px;
+        font-size: 18px;
+        padding: 10px 50px 10px 20px;
+      }
+
+      .search-bar-icon {
+        font-size: 1.2rem;
+      }
+    }
+
+    /* Orta Ekranlar (768px - 991px) */
+    @media (min-width: 768px) and (max-width: 991px) {
+      .search-bar {
+        height: 45px;
+        font-size: 17px;
+        padding: 9px 48px 9px 18px;
+      }
+
+      .search-bar-icon {
+        font-size: 1.1rem;
+      }
+    }
+
+    /* Küçük Ekranlar (576px - 767px) */
+    @media (min-width: 576px) and (max-width: 767px) {
+      .search-bar {
+        height: 40px;
+        font-size: 16px;
+        padding: 8px 46px 8px 16px;
+      }
+
+      .search-bar-icon {
+        font-size: 1rem;
+      }
+    }
+
+    /* Çok Küçük Ekranlar (341px - 575.98px) */
+    @media (max-width: 575.98px) {
+      .search-bar {
+        height: 35px;
+        font-size: 14px;
+        padding: 7px 44px 7px 14px;
+        max-width: 360px;
+      }
+
+      .search-bar-icon {
+        font-size: 0.9rem;
+      }
+    }
+
+    /* Ultra Küçük Ekranlar (max-width: 340px) */
+    @media (max-width: 340px) {
+      .search-bar {
+        height: 30px;
+        font-size: 13px;
+        padding: 6px 42px 6px 12px;
+        max-width: 320px;
+      }
+
+      .search-bar-icon {
+        font-size: 0.8rem;
+      }
+    }
+
+    /* İkinci Navbar'ın görünürlüğünü ayarla */
+    @media (max-width: 992px) {
+      #secondNavbar {
+        display: none;
+      }
+    }
+
+    @media (min-width: 993px) {
+      #offcanvasNavbar {
+        display: none !important;
+      }
+    }
+
+    /* Navbar öğelerini merkezde hizalama */
+    @media (min-width: 992px) {
+      #secondNavbar .navbar-nav {
+        margin: 0 auto;
+      }
+    }
+
+    /* Navbar markasını ortalamak için */
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      margin: 0 auto;
+    }
+
+    .navbar-brand img {
+      height: 40px;
+    }
+
+    /* Carousel göstergeleri */
+    .carousel-indicators {
+      bottom: -30px;
+    }
+
+    .carousel-indicators button {
+      width: 150px;
+      height: 80px;
+      margin-top: -60px;
+      opacity: 0;
+      background-color: rgb(49, 49, 49) !important;
+    }
+
+    .carousel-indicators button:hover {
+      opacity: 1;
+    }
+
+    /* Kategori Rozeti için */
+    .badge.bg-info {
+      background-color: #17a2b8 !important;
+    }
+
+    /* "Hakkımızda" Bağlantısı için Özelleştirme */
+    .navbar .btn-link {
+      text-decoration: none;
+      font-size: 1rem;
+    }
+
+    .navbar .btn-link:hover {
+      color: #FFD700 !important;
+    }
+
+    /* Responsive Düzenlemeler için Genel Ayarlar */
+    @media (max-width: 768px) {
+      .search-bar-container {
+        max-width: 300px;
+      }
+
+      .search-bar {
+        padding: 8px 40px 8px 15px;
+      }
+
+      .search-bar-icon {
+        right: 15px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .search-bar-container {
+        max-width: 150px;
+      }
+
+      .search-bar {
+        padding: 6px 35px 6px 10px;
+        font-size: 14px;
+      }
+
+      .search-bar-icon {
+        right: 10px;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+
+</head>
+
+<body style="background-color: rgba(227, 222, 222, 0.473);">
+  <!-- Birinci Navbar (ana navbar) -->
+  <nav style="background-color: #f36835;" class="navbar navbar-dark">
+    <div class="container-fluid">
+      <div class="d-flex justify-content-center align-items-center w-100 position-relative">
+        <!-- Logo -->
+        <a class="navbar-brand text-light mx-0" href="/">
+          <img src="/favicon.png" alt="Logo">
+          <span style="font-size: clamp(14px, 2vw, 20px);">ALLURE ELECTRONIC</span>
+        </a>
+
+        <!-- Arama Çubuğu -->
+        <div class="search-bar-container mx-3">
+          <input type="text" id="searchInput" class="form-control search-bar" placeholder="Ürün Ara..." aria-label="Ürün Ara">
+          <i class="fas fa-search search-bar-icon"></i>
+        </div>
+
+        <!-- "Hakkımızda" Bağlantısı -->
+        <a href="hakkimizda.html" class="btn btn-link text-light mx-3 d-none d-lg-block">Hakkımızda</a>
+
+        <!-- Navbar Toggler (Mobil Menü) -->
+        <button class="navbar-toggler d-lg-none ms-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Sidebar olarak çalışacak offcanvas -->
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Kategori Menüsü</h5>
+      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Kapat"></button>
+    </div>
+    <div class="offcanvas-body">
+      <ul class="navbar-nav">
+        <!-- Bilgisayar Menüsü -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="bilgisayar.html" id="bilgisayarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Bilgisayar
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="oyun-bilgisayari.html">Oyun Bilgisayarı</a></li>
+            <li><a class="dropdown-item" href="mini-pc.html">Mini PC</a></li>
+            <li><a class="dropdown-item" href="all-in-one-bilgisayar.html">All in One PC</a></li>
+          </ul>
+        </li>
+
+        <!-- Laptop Menüsü -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="laptop.html" id="laptopDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Laptop
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="kurumsal-laptop.html">Kurumsal Laptop</a></li>
+            <li><a class="dropdown-item" href="gaming-laptop.html">Gaming Laptop</a></li>
+          </ul>
+        </li>
+
+        <!-- Çevre Birimleri Menüsü -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="cevreBirimleriDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Çevre Birimleri
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="ram.html">RAM</a></li>
+            <li><a class="dropdown-item" href="islemci.html">İşlemci</a></li>
+            <li><a class="dropdown-item" href="anakart.html">Anakart</a></li>
+            <li><a class="dropdown-item" href="depolama.html">Depolama</a></li>
+            <li><a class="dropdown-item" href="monitör.html">Monitör</a></li>
+            <li><a class="dropdown-item" href="ekran-karti.html">Ekran Kartı</a></li>
+            <li><a class="dropdown-item" href="klavye.html">Klavye</a></li>
+            <li><a class="dropdown-item" href="mause.html">Mouse</a></li>
+          </ul>
+        </li>
+
+        <!-- Diğer Menüler -->
+        <li class="nav-item">
+          <a class="nav-link" href="cisco-networks.html">Cisco Networks</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="aruba-networks.html">Aruba Networks</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="cisco-systems.html">Cisco Systems</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="2-el-urunler.html">2. El Ürünler</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="firsat-urunleri.html">Fırsat Ürünleri</a>
+        </li>
+        <!-- "Hakkımızda" Bağlantısı -->
+        <li class="nav-item">
+          <a class="nav-link" href="hakkimizda.html">Hakkımızda</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- İkinci Navbar (kategori navbarı, sadece büyük ekranlarda görünür) -->
+  <nav style="background-color: #f3ad35;" class="navbar navbar-expand-lg mt-1" id="secondNavbar">
+    <div class="container-fluid">
+      <ul class="navbar-nav mx-auto">
+        <!-- Bilgisayar Menüsü -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="bilgisayar.html" id="bilgisayarDropdownMain" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Bilgisayar
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="oyun-bilgisayari.html">Oyun Bilgisayarı</a></li>
+            <li><a class="dropdown-item" href="mini-pc.html">Mini PC</a></li>
+            <li><a class="dropdown-item" href="all-in-one-bilgisayar.html">All in One PC</a></li>
+          </ul>
+        </li>
+
+        <!-- Laptop Menüsü -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="laptop.html" id="laptopDropdownMain" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Laptop
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="kurumsal-laptop.html">Kurumsal Laptop</a></li>
+            <li><a class="dropdown-item" href="gaming-laptop.html">Gaming Laptop</a></li>
+          </ul>
+        </li>
+
+        <!-- Çevre Birimleri Menüsü -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="cevreBirimleriDropdownMain" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Çevre Birimleri
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="ram.html">RAM</a></li>
+            <li><a class="dropdown-item" href="islemci.html">İşlemci</a></li>
+            <li><a class="dropdown-item" href="anakart.html">Anakart</a></li>
+            <li><a class="dropdown-item" href="depolama.html">Depolama</a></li>
+            <li><a class="dropdown-item" href="monitör.html">Monitör</a></li>
+            <li><a class="dropdown-item" href="ekran-karti.html">Ekran Kartı</a></li>
+            <li><a class="dropdown-item" href="klavye.html">Klavye</a></li>
+            <li><a class="dropdown-item" href="mause.html">Mouse</a></li>
+          </ul>
+        </li>
+
+        <!-- Diğer Menüler -->
+        <li class="nav-item">
+          <a class="nav-link" href="cisco-networks.html">Cisco Networks</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="aruba-networks.html">Aruba Networks</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="cisco-systems.html">Cisco Systems</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="2-el-urunler.html">2. El Ürünler</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="firsat-urunleri.html">Fırsat Ürünleri</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Ürün Listesi -->
+  <div class="container mt-5">
+    <h2 class="mb-4 text-center">İkinci El Ürün Listesi</h2>
+    <div class="row" id="productsTableBody"></div>
+  </div>
+
+  <!-- Bootstrap Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Dropdown Kapanması için JavaScript Kodu -->
+  <script>
+    // Offcanvas içindeki dropdown menü öğelerine tıklandığında offcanvas'ı kapat
+    document.querySelectorAll('.offcanvas .dropdown-menu a').forEach(function(element) {
+      element.addEventListener('click', function() {
+        var offcanvasElement = document.getElementById('offcanvasNavbar');
+        var offcanvas = bootstrap.Offcanvas.getInstance(offcanvasElement);
+        if (offcanvas) {
+          offcanvas.hide();
+        }
+      });
+    });
+
+    // Dropdown menülerine tıklandığında dropdown kapanmasını sağla
+    document.querySelectorAll('.dropdown-menu a').forEach(function(element) {
+      element.addEventListener('click', function() {
+        var dropdownToggle = this.closest('.dropdown').querySelector('.dropdown-toggle');
+        var dropdown = bootstrap.Dropdown.getInstance(dropdownToggle);
+        if (dropdown) {
+          dropdown.hide();
+        }
+      });
+    });
+  </script>
+
+</body>
+
+</html>

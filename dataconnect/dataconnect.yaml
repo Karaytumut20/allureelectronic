@@ -1,0 +1,12 @@
+specVersion: "v1beta"
+serviceId: "startbootstrap-shop-item-gh-pages"
+location: "us-central1"
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "fdcdb"
+      cloudSql:
+        instanceId: "startbootstrap-shop-item-gh-pages-fdc"
+      # schemaValidation: "COMPATIBLE"
+connectorDirs: ["./connector"]

@@ -1,0 +1,1765 @@
+<!doctype html>
+<html lang="tr">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ürün Detayı</title>
+  <link rel="shortcut icon" type="image/png" href="../../../favicon.png" />
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <style>
+    /* Navbar bağlantılarının temel rengi */
+    .navbar-nav .nav-link {
+      color: white !important;
+    }
+
+    /* Navbar bağlantılarının hover rengi (sadece büyük ekranlarda) */
+    @media (min-width: 992px) {
+      .navbar-nav .nav-link:hover {
+        color: #FFD700 !important;
+        background-color: #343a40;
+      }
+
+      /* Dropdown menü öğelerinin hover rengi */
+      .navbar-nav .dropdown:hover .dropdown-menu {
+        display: block;
+      }
+
+      .offcanvas-body .dropdown:hover .dropdown-menu {
+        display: block;
+      }
+    }
+
+    /* Dropdown menü öğelerinin temel rengi */
+    .dropdown-menu .dropdown-item {
+      color: white;
+    }
+
+    /* Dropdown menü öğelerinin hover rengi */
+    .dropdown-menu .dropdown-item:hover {
+      color: #FFFFFF !important;
+      background-color: #6c757d;
+    }
+
+    /* Diğer CSS kuralları */
+    .offcanvas-start {
+      width: 250px;
+    }
+
+    .offcanvas-body {
+      padding: 1rem;
+    }
+
+    .card {
+      width: 350px;
+      height: 500px;
+    }
+
+    .carousel-item img {
+      object-fit: contain;
+      height: 450px;
+      border-radius: 10px;
+    }
+
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+      background-color: #333333;
+      border-radius: 50%;
+    }
+
+    .mb-4 {
+      margin-bottom: 30px;
+    }
+
+    .product-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .product-card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .product-details {
+      background-color: rgba(227, 222, 222, 0.473);
+      padding: 3% 5%;
+      border-radius: 20px;
+      box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .hover-effect:hover {
+      transform: translateY(4px);
+      box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .product-info {
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .product-container {
+      display: flex;
+      gap: 50px;
+    }
+
+    @media (max-width: 768px) {
+      .product-container {
+        flex-direction: column;
+      }
+    }
+
+    .btn-primary {
+      background-color: #FF6F61;
+      border: none;
+      padding: 15px 30px;
+      font-size: 1.1rem;
+      border-radius: 30px;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      background-color: #F4A261;
+      transform: scale(1.05);
+    }
+
+    /* Arama Barı */
+    .search-bar-container {
+      position: relative;
+      width: 600px;
+      margin: auto;
+    }
+
+    @media (max-width: 768px) {
+      .search-bar-container {
+        max-width: 600px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .search-bar-container {
+        max-width: 200px;
+      }
+    }
+
+    @media (max-width: 387px) {
+      .search-bar-container {
+        max-width: 150px;
+      }
+    }
+
+    @media (max-width: 340px) {
+      .search-bar-container {
+        max-width: 120px;
+      }
+    }
+
+    .search-bar {
+      border-radius: 15px;
+      padding-right: 40px;
+      padding-left: 15px;
+      height: 40px;
+      border: 1px solid #ced4da;
+    }
+
+    .search-bar-icon {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.2rem;
+      color: #6c757d;
+      pointer-events: none;
+    }
+
+    @media (max-width: 992px) {
+      #secondNavbar {
+        display: none;
+      }
+    }
+
+    @media (min-width: 993px) {
+      #offcanvasNavbar {
+        display: none !important;
+      }
+    }
+
+    /* Ortalamayı sağlamak için */
+    .navbar-brand {
+      margin: 0 auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .carousel-indicators {
+      bottom: -30px;
+    }
+
+    .carousel-indicators button {
+      width: 150px;
+      height: 80px;
+      margin-top: -60px;
+      opacity: 0;
+      background-color: rgb(49, 49, 49) !important;
+    }
+
+    .carousel-indicators button:hover {
+      opacity: 1;
+    }
+
+    /* Optional: Adjust dropdown transition */
+    .dropdown-menu {
+      transition: all 0.3s ease;
+      min-width: 200px;
+    }
+
+    /* Standard Dropdown Styles */
+    .dropdown-menu {
+      min-width: 200px;
+    }
+
+    /* Butonun font boyutunu artırmak için */
+
+  </style>
+
+</head>
+
+<body>
+
+  <!-- Birinci Navbar (ana navbar) -->
+  <nav class="navbar navbar-dark bg-dark">
+    <div class="container-fluid">
+      <div class="d-flex justify-content-center align-items-center w-100">
+        <a class="navbar-brand d-flex align-items-center" href="index.html">
+          <span>Your Store</span>
+          <div class="search-bar-container ms-3">
+            <input type="text" id="searchInput" class="form-control search-bar" placeholder="Ürün Ara..." aria-label="Ürün Ara">
+            <i class="fas fa-search search-bar-icon"></i>
+          </div>
+        </a>
+        <button style="margin-left: 1px;" class="navbar-toggler d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Sidebar olarak çalışacak offcanvas -->
+  <div class="offcanvas offcanvas-start bg-dark" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title text-white" id="offcanvasNavbarLabel">Kategori Menüsü</h5>
+      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <ul class="navbar-nav">
+        <!-- Bilgisayar Menüsü -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle text-white" href="bilgisayar.html" id="bilgisayarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Bilgisayar
+          </a>
+          <ul class="dropdown-menu bg-dark" aria-labelledby="bilgisayarDropdown">
+            <li><a class="dropdown-item text-white" href="oyun-bilgisayari.html">Oyun Bilgisayarı</a></li>
+            <li><a class="dropdown-item text-white" href="mini-pc.html">Mini PC</a></li>
+            <li><a class="dropdown-item text-white" href="all-in-one-bilgisayar.html">All in One PC</a></li>
+          </ul>
+        </li>
+
+        <!-- Laptop Menüsü -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle text-white" href="laptop.html" id="laptopDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Laptop
+          </a>
+          <ul class="dropdown-menu bg-dark" aria-labelledby="laptopDropdown">
+            <li><a class="dropdown-item text-white" href="kurumsal-laptop.html">Kurumsal Laptop</a></li>
+            <li><a class="dropdown-item text-white" href="gaming-laptop.html">Gaming Laptop</a></li>
+          </ul>
+        </li>
+
+        <!-- Çevre Birimleri Menüsü (Standart Dropdown) -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle text-white" href="#" id="cevreBirimleriDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Çevre Birimleri
+          </a>
+          <ul class="dropdown-menu bg-dark" aria-labelledby="cevreBirimleriDropdown">
+            <li><a class="dropdown-item text-white" href="ram.html">RAM</a></li>
+            <li><a class="dropdown-item text-white" href="islemci.html">İşlemci</a></li>
+            <li><a class="dropdown-item text-white" href="anakart.html">Anakart</a></li>
+            <li><a class="dropdown-item text-white" href="depolama.html">Depolama</a></li>
+            <li><a class="dropdown-item text-white" href="monitör.html">Monitör</a></li>
+            <li><a class="dropdown-item text-white" href="ekran-karti.html">Ekran Kartı</a></li>
+            <li><a class="dropdown-item text-white" href="klavye.html">Klavye</a></li>
+            <li><a class="dropdown-item text-white" href="mause.html">Mouse</a></li>
+            <li><a class="dropdown-item text-white" href="bilgisayar-kasa.html">Bilgisayar Kasa</a></li>
+          </ul>
+        </li>
+
+        <!-- Diğer Menüler -->
+        <li class="nav-item">
+          <a class="nav-link text-white" href="cisco-networks.html">Cisco Networks</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-white" href="aruba-networks.html">Aruba Networks</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-white" href="cisco-systems.html">Cisco Systems</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-white" href="2-el-urunler.html">2. El Ürünler</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-white" href="firsat-urunleri.html">Fırsat Ürünleri</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- İkinci Navbar (kategori navbarı, sadece büyük ekranlarda görünür) -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mt-1" id="secondNavbar">
+    <div class="container-fluid justify-content-center">
+      <ul class="navbar-nav">
+        <!-- Bilgisayar Menüsü -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="bilgisayar.html" id="bilgisayarDropdownMain" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Bilgisayar
+          </a>
+          <ul class="dropdown-menu bg-dark" aria-labelledby="bilgisayarDropdownMain">
+            <li><a class="dropdown-item text-white" href="oyun-bilgisayari.html">Oyun Bilgisayarı</a></li>
+            <li><a class="dropdown-item text-white" href="mini-pc.html">Mini PC</a></li>
+            <li><a class="dropdown-item text-white" href="all-in-one-bilgisayar.html">All in One PC</a></li>
+          </ul>
+        </li>
+
+        <!-- Laptop Menüsü -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="laptop.html" id="laptopDropdownMain" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Laptop
+          </a>
+          <ul class="dropdown-menu bg-dark" aria-labelledby="laptopDropdownMain">
+            <li><a class="dropdown-item text-white" href="kurumsal-laptop.html">Kurumsal Laptop</a></li>
+            <li><a class="dropdown-item text-white" href="gaming-laptop.html">Gaming Laptop</a></li>
+          </ul>
+        </li>
+
+        <!-- Çevre Birimleri Menüsü (Standart Dropdown) -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle text-white" href="#" id="cevreBirimleriDropdownMain" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Çevre Birimleri
+          </a>
+          <ul class="dropdown-menu bg-dark" aria-labelledby="cevreBirimleriDropdownMain">
+            <li><a class="dropdown-item text-white" href="ram.html">RAM</a></li>
+            <li><a class="dropdown-item text-white" href="islemci.html">İşlemci</a></li>
+            <li><a class="dropdown-item text-white" href="anakart.html">Anakart</a></li>
+            <li><a class="dropdown-item text-white" href="depolama.html">Depolama</a></li>
+            <li><a class="dropdown-item text-white" href="monitör.html">Monitör</a></li>
+            <li><a class="dropdown-item text-white" href="ekran-karti.html">Ekran Kartı</a></li>
+            <li><a class="dropdown-item text-white" href="klavye.html">Klavye</a></li>
+            <li><a class="dropdown-item text-white" href="mause.html">Mouse</a></li>
+            <li><a class="dropdown-item text-white" href="bilgisayar-kasa.html">Bilgisayar Kasa</a></li>
+          </ul>
+        </li>
+
+        <!-- Diğer Menüler -->
+        <li class="nav-item">
+          <a class="nav-link" href="cisco-networks.html">Cisco Networks</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="aruba-networks.html">Aruba Networks</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="cisco-systems.html">Cisco Systems</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="2-el-urunler.html">2. El Ürünler</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="firsat-urunleri.html">Fırsat Ürünleri</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Ürün Detayı -->
+  <div class="container product-details hover-effect mt-5">
+    <div class="product-container">
+      <!-- Carousel (Ürün Resimleri) -->
+      <div class="col-lg-6 col-md-12">
+        <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-inner" id="carouselImages"></div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Ürün Bilgileri -->
+      <div class="col-lg-6 col-md-12 product-info">
+        <h1 id="productName" class="product-title">Ürün Adı</h1>
+        <p id="productPrice" class="product-price"><strong>Fiyat:</strong> ₺</p>
+        <p id="productCategory" class="product-category"><strong>Kategori:</strong> </p>
+        <p id="productDescription" class="product-description"></p>
+
+        <!-- Bilgisayar Bileşenleri -->
+        <div id="computerComponents" style="display: none;">
+          <p id="productProcessor"><strong>İşlemci:</strong> </p>
+          <p id="productRam"><strong>RAM:</strong> </p>
+          <p id="productSsd"><strong>SSD:</strong> </p>
+          <p id="productMotherboard"><strong>Anakart:</strong> </p>
+          <p id="productPowerSupply"><strong>Güç Kaynağı:</strong> </p>
+          <p id="productGraphicsCard"><strong>Ekran Kartı:</strong> </p>
+        </div>
+
+        <!-- Çevre Birimleri -->
+        <div id="peripheralDetails" style="display: none;">
+          <!-- RAM -->
+          <div id="peripheralRAM" style="display: none;">
+            <p id="productRamDDR"><strong>DDR:</strong> </p>
+            <p id="productRamGB"><strong>RAM Kapasitesi (GB):</strong> </p>
+            <p id="productRamMHz"><strong>RAM Hızı (MHz):</strong> </p>
+            <p id="productRamType"><strong>RAM Tipi:</strong> </p>
+            <p id="productRamBrand"><strong>RAM Markası:</strong> </p>
+            <p id="productRamSlots"><strong>RAM Slotu Sayısı:</strong> </p>
+            <p id="productMaxRam"><strong>Maksimum RAM Desteği (GB):</strong> </p>
+            <p id="productMaxRamMHz"><strong>Maksimum RAM Hızı (MHz):</strong> </p>
+          </div>
+
+          <!-- GPU -->
+          <div id="peripheralGPU" style="display: none;">
+            <p id="productGpuBrand"><strong>GPU Markası:</strong> </p>
+            <p id="gpuModel"><strong>GPU Modeli:</strong> </p>
+            <p id="productGpuVram"><strong>GPU VRAM (GB):</strong> </p>
+            <p id="productGpuOutputs"><strong>Görüntü Çıkışları:</strong> </p>
+            <p id="productGpuBitInput"><strong>Bit Girişi:</strong> </p>
+          </div>
+
+          <!-- Monitör -->
+          <div id="peripheralMonitor" style="display: none;">
+            <p id="productMonitorBrand"><strong>Monitör Markası:</strong> </p>
+            <p id="productMonitorModel"><strong>Monitör Modeli:</strong> </p>
+            <p id="monitorResolution"><strong>Çözünürlük:</strong> </p>
+            <p id="monitorInch"><strong>İnç:</strong> </p>
+            <p id="monitorHz"><strong>Hz:</strong> </p>
+            <p id="productMonitorOutputs"><strong>Giriş/Çıkış Çıkışları:</strong> </p>
+          </div>
+
+          <!-- İşlemci -->
+          <div id="peripheralProcessor" style="display: none;">
+            <p id="productProcessorBrand"><strong>İşlemci Markası:</strong> </p>
+            <p id="productProcessorModel"><strong>İşlemci Modeli:</strong> </p>
+            <p id="productProcessorSocketType"><strong>Soket Tipi:</strong> </p>
+            <p id="productProcessorCores"><strong>Çekirdek Sayısı:</strong> </p>
+            <p id="productProcessorGHz"><strong>GHz Hızı:</strong> </p>
+            <p id="productProcessorCache"><strong>Önbellek (MB):</strong> </p>
+          </div>
+
+          <!-- Depolama -->
+          <div id="peripheralStorage" style="display: none;">
+            <p id="productStorageType"><strong>Depolama Türü:</strong> </p>
+            <p id="productStorageSize"><strong>Depolama Kapasitesi (GB):</strong> </p>
+            <p id="productStorageBrand"><strong>Depolama Markası:</strong> </p>
+            <p id="productStorageReadSpeed"><strong>Okuma Hızı (MB/s):</strong> </p>
+            <p id="productStorageWriteSpeed"><strong>Yazma Hızı (MB/s):</strong> </p>
+          </div>
+
+          <!-- Anakart -->
+          <div id="peripheralMotherboard" style="display: none;">
+            <p id="peripheralProductMotherboardBrand"><strong>Anakart Markası:</strong> </p>
+            <p id="peripheralProductSocketType"><strong>Soket Tipi:</strong> </p>
+            <p id="peripheralProductMotherboardModel"><strong>Anakart Modeli:</strong> </p>
+            <p id="peripheralProductM2Support"><strong>M2 Desteği:</strong> </p>
+          </div>
+
+          <!-- Bilgisayar Kasa -->
+          <div id="peripheralComputerCase" style="display: none;">
+            <p id="productCaseType"><strong>Kasa Tipi:</strong> </p>
+            <p id="productCaseStyle"><strong>Kasa Stili:</strong> </p>
+            <p id="productPowerSupplyWatt"><strong>Power Supply Watt (W):</strong> </p>
+            <p id="productCaseBrand"><strong>Kasa Markası:</strong> </p>
+          </div>
+
+          <!-- Klavye -->
+          <div id="peripheralKeyboard" style="display: none;">
+            <p id="productKeyboardBrand"><strong>Klavye Markası:</strong> </p>
+            <p id="productKeyboardModel"><strong>Klavye Modeli:</strong> </p>
+            <p id="productKeyboardType"><strong>Klavye Tipi:</strong> </p>
+          </div>
+
+          <!-- Mouse -->
+          <div id="peripheralMouse" style="display: none;">
+            <p id="productMouseBrand"><strong>Mouse Markası:</strong> </p>
+            <p id="productMouseModel"><strong>Mouse Modeli:</strong> </p>
+            <p id="productMouseType"><strong>Mouse Tipi:</strong> </p>
+          </div>
+        </div>
+
+        <!-- Cisco Networks -->
+        <div id="ciscoFields" style="display: none;">
+          <p id="ciscoSubCategory"><strong>Alt Kategori:</strong> </p>
+          <div id="ciscoSwitchesFields" style="display: none;">
+            <p id="ciscoSwitchModel"><strong>Switch Modeli:</strong> </p>
+          </div>
+          <div id="ciscoRoutersFields" style="display: none;">
+            <p id="ciscoRouterModel"><strong>Router Modeli:</strong> </p>
+          </div>
+          <div id="ciscoAccessPointsFields" style="display: none;">
+            <p id="ciscoAccessPointModel"><strong>Access Point Modeli:</strong> </p>
+          </div>
+        </div>
+
+        <!-- Aruba Networks -->
+        <div id="arubaFields" style="display: none;">
+          <p id="arubaSubCategory"><strong>Alt Kategori:</strong> </p>
+          <div id="arubaSwitchesFields" style="display: none;">
+            <p id="arubaSwitchModel"><strong>Switch Modeli:</strong> </p>
+          </div>
+          <div id="arubaWirelessAPFields" style="display: none;">
+            <p id="arubaWirelessAPModel"><strong>Wireless Access Point Modeli:</strong> </p>
+          </div>
+          <div id="arubaNetworkMgmtFields" style="display: none;">
+            <p id="arubaNetworkMgmtModel"><strong>Network Management Modeli:</strong> </p>
+          </div>
+        </div>
+
+        <!-- Cisco Systems -->
+        <div id="ciscoSystemsFields" style="display: none;">
+          <p id="ciscoSystemsSubCategory"><strong>Alt Kategori:</strong> </p>
+          <div id="ciscoSystemsSecurityFields" style="display: none;">
+            <p id="ciscoSystemsSecurityModel"><strong>Security Modeli:</strong> </p>
+          </div>
+          <div id="ciscoSystemsCollaborationFields" style="display: none;">
+            <p id="ciscoSystemsCollaborationModel"><strong>Collaboration Modeli:</strong> </p>
+          </div>
+          <div id="ciscoSystemsSDWANFields" style="display: none;">
+            <p id="ciscoSystemsSDWANModel"><strong>SD-WAN Modeli:</strong> </p>
+          </div>
+          <div id="ciscoSystemsMerakiMXFields" style="display: none;">
+            <p id="ciscoSystemsMerakiMXModel"><strong>Meraki MX Modeli:</strong> </p>
+          </div>
+        </div>
+
+        <!-- Sunucu -->
+        <div id="serverFields" style="display: none;">
+          <p id="serverSubCategory"><strong>Sunucu Alt Kategorisi:</strong> </p>
+          <div id="serverTowerFields" style="display: none;">
+            <p id="serverTowerModel"><strong>Tower Server Modeli:</strong> </p>
+            <p id="serverProcessorTower"><strong>İşlemci:</strong> </p>
+            <p id="serverRAMTower"><strong>RAM:</strong> </p>
+            <p id="serverStorageTower"><strong>Depolama:</strong> </p>
+          </div>
+          <div id="serverRackFields" style="display: none;">
+            <p id="serverRackModel"><strong>Rack Server Modeli:</strong> </p>
+            <p id="serverProcessorRack"><strong>İşlemci:</strong> </p>
+            <p id="serverRAMRack"><strong>RAM:</strong> </p>
+            <p id="serverStorageRack"><strong>Depolama:</strong> </p>
+          </div>
+          <div id="serverBladeFields" style="display: none;">
+            <p id="serverBladeModel"><strong>Blade Server Modeli:</strong> </p>
+            <p id="serverProcessorBlade"><strong>İşlemci:</strong> </p>
+            <p id="serverRAMBlade"><strong>RAM:</strong> </p>
+            <p id="serverStorageBlade"><strong>Depolama:</strong> </p>
+          </div>
+        </div>
+
+        <!-- Sunucu Çevre Birimleri -->
+        <div id="serverPeripheralFields" style="display: none;">
+          <p id="serverPeripheralCategory"><strong>Sunucu Çevre Birimi:</strong> </p>
+          <div id="serverPeripheralFieldsCPU" style="display: none;">
+            <p id="serverPeripheralProcessorModel"><strong>İşlemci Modeli:</strong> </p>
+            <p id="serverPeripheralProcessorCores"><strong>Çekirdek Sayısı:</strong> </p>
+            <p id="serverPeripheralProcessorGHz"><strong>Temel GHz Hızı:</strong> </p>
+            <p id="serverPeripheralProcessorTurboGHz"><strong>Maksimum Turbo GHz Hızı:</strong> </p>
+            <p id="serverPeripheralProcessorTDP"><strong>TDP (W):</strong> </p>
+          </div>
+          <div id="serverPeripheralFieldsRAM" style="display: none;">
+            <p id="serverPeripheralRAMCapacity"><strong>RAM Kapasitesi (GB):</strong> </p>
+            <p id="serverPeripheralRAMMHz"><strong>RAM Hızı (MHz):</strong> </p>
+            <p id="serverPeripheralRAMType"><strong>RAM Tipi:</strong> </p>
+            <p id="serverPeripheralRAMBrand"><strong>RAM Markası:</strong> </p>
+            <p id="serverPeripheralRAMECC"><strong>ECC Desteği:</strong> </p>
+          </div>
+          <div id="serverPeripheralFieldsStorage" style="display: none;">
+            <p id="serverPeripheralStorageType"><strong>Depolama Türü:</strong> </p>
+            <p id="serverPeripheralStorageCapacity"><strong>Depolama Kapasitesi (GB/TB):</strong> </p>
+            <p id="serverPeripheralStorageBrand"><strong>Depolama Markası:</strong> </p>
+            <p id="serverPeripheralStorageReadSpeed"><strong>Okuma Hızı (MB/s):</strong> </p>
+            <p id="serverPeripheralStorageWriteSpeed"><strong>Yazma Hızı (MB/s):</strong> </p>
+          </div>
+          <div id="serverPeripheralFieldsMotherboard" style="display: none;">
+            <p id="serverPeripheralMotherboardBrand"><strong>Anakart Markası:</strong> </p>
+            <p id="serverPeripheralMotherboardSocket"><strong>Soket Tipi:</strong> </p>
+            <p id="serverPeripheralMotherboardModel"><strong>Anakart Modeli:</strong> </p>
+            <p id="serverPeripheralMotherboardM2"><strong>M2 Desteği:</strong> </p>
+            <p id="serverPeripheralMotherboardRAID"><strong>RAID Desteği:</strong> </p>
+          </div>
+          <div id="serverPeripheralFieldsHDD" style="display: none;">
+            <p id="serverPeripheralHDD"><strong>HDD Modeli:</strong> </p>
+            <p id="serverPeripheralHDDCapacity"><strong>Kapasite (GB/TB):</strong> </p>
+            <p id="serverPeripheralHDDSpeed"><strong>Hız (RPM):</strong> </p>
+            <p id="serverPeripheralHDDCache"><strong>Cache Boyutu (MB):</strong> </p>
+          </div>
+          <div id="serverPeripheralFieldsRAID" style="display: none;">
+            <p id="serverPeripheralRAIDController"><strong>RAID Controller Modeli:</strong> </p>
+            <p id="serverPeripheralRAIDLevels"><strong>Desteklenen RAID Seviyeleri:</strong> </p>
+          </div>
+          <div id="serverPeripheralFieldsNetwork" style="display: none;">
+            <p id="serverPeripheralNetworkCard"><strong>Network Card Modeli:</strong> </p>
+            <p id="serverPeripheralNetworkSpeed"><strong>Bağlantı Hızı (Gbps):</strong> </p>
+            <p id="serverPeripheralNetworkPorts"><strong>Port Sayısı:</strong> </p>
+            <p id="serverPeripheralNetworkTechnologies"><strong>Desteklenen Teknolojiler:</strong> </p>
+          </div>
+        </div>
+
+        <!-- Bilgisayar Kasa -->
+        <div id="peripheralComputerCase" style="display: none;">
+          <p id="productCaseType"><strong>Kasa Tipi:</strong> </p>
+          <p id="productCaseStyle"><strong>Kasa Stili:</strong> </p>
+          <p id="productPowerSupplyWatt"><strong>Power Supply Watt (W):</strong> </p>
+          <p id="productCaseBrand"><strong>Kasa Markası:</strong> </p>
+        </div>
+
+        <!-- Satın Al Butonuna WhatsApp Mesajı Gönderme Özelliği Eklendi -->
+        <button id="purchaseButton" class="btn btn-primary mt-4">Satın Al</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Dropdown Kapanması için JavaScript Kodu -->
+  <script>
+    // Offcanvas içindeki dropdown menü öğelerine tıklandığında offcanvas'ı kapat
+    document.querySelectorAll('.offcanvas .dropdown-menu a').forEach(function(element) {
+      element.addEventListener('click', function() {
+        var offcanvasElement = document.getElementById('offcanvasNavbar');
+        var offcanvas = bootstrap.Offcanvas.getInstance(offcanvasElement);
+        if (offcanvas) {
+          offcanvas.hide();
+        }
+      });
+    });
+
+    // Dropdown menülerine tıklandığında dropdown kapanmasını sağla
+    document.querySelectorAll('.dropdown-menu a').forEach(function(element) {
+      element.addEventListener('click', function() {
+        var dropdownToggle = this.closest('.dropdown').querySelector('.dropdown-toggle');
+        var dropdown = bootstrap.Dropdown.getInstance(dropdownToggle);
+        if (dropdown) {
+          dropdown.hide();
+        }
+      });
+    });
+  </script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    // Firebase yapılandırması
+    const firebaseConfig = {
+      apiKey: "AIzaSyCYOOa5J3U6k_kVM721xF7LCoxWY6EsE7Q",
+      authDomain: "electronic-b4925.firebaseapp.com",
+      projectId: "electronic-b4925",
+      storageBucket: "electronic-b4925.appspot.com",
+      messagingSenderId: "904593171488",
+      appId: "1:904593171488:web:3a8f5967cad2bd7bbac845",
+      measurementId: "G-BSXFE5FHJV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function fetchProductDetails() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const productId = urlParams.get('id');
+
+      if (!productId) {
+        alert('Ürün bulunamadı.');
+        return;
+      }
+
+      try {
+        const productDoc = await getDoc(doc(db, "products", productId));
+
+        if (productDoc.exists()) {
+          const product = productDoc.data();
+
+          // Genel Ürün Bilgileri
+          if (product.name) {
+            document.getElementById('productName').innerHTML = `${product.name}`;
+          }
+
+          if (product.price) {
+            const productPrice = document.getElementById('productPrice');
+            productPrice.innerHTML = `<strong>Fiyat:</strong> ₺${product.price}`;
+            productPrice.style.display = 'block';
+          } else {
+            document.getElementById('productPrice').style.display = 'none';
+          }
+
+          if (product.category) {
+            document.getElementById('productCategory').innerHTML = `<strong>Kategori:</strong> ${product.category}` + (product.peripheral ? ` / ${product.peripheral}` : '');
+          }
+
+          if (product.description) {
+            document.getElementById('productDescription').innerHTML = `${product.description}`;
+          }
+
+          // Bilgisayar Bileşenleri
+          const bilgisayarKategorileri = ["Bilgisayar", "Oyun Bilgisayarı", "All in One Bilgisayar", "Bilgisayar Bileşenleri", "Mini pc", "Laptop", "Kurumsal laptop", "Gaming laptop"];
+          if (bilgisayarKategorileri.includes(product.category)) {
+            document.getElementById('computerComponents').style.display = 'block';
+
+            if (product.processor) {
+              document.getElementById('productProcessor').innerHTML = `<strong>İşlemci:</strong> ${product.processor}`;
+            } else {
+              document.getElementById('productProcessor').style.display = 'none';
+            }
+
+            if (product.ram) {
+              document.getElementById('productRam').innerHTML = `<strong>RAM:</strong> ${product.ram}`;
+            } else {
+              document.getElementById('productRam').style.display = 'none';
+            }
+
+            if (product.ssd) {
+              document.getElementById('productSsd').innerHTML = `<strong>SSD:</strong> ${product.ssd}`;
+            } else {
+              document.getElementById('productSsd').style.display = 'none';
+            }
+
+            if (product.motherboard) {
+              document.getElementById('productMotherboard').innerHTML = `<strong>Anakart:</strong> ${product.motherboard}`;
+            } else {
+              document.getElementById('productMotherboard').style.display = 'none';
+            }
+
+            if (product.powerSupply) {
+              document.getElementById('productPowerSupply').innerHTML = `<strong>Güç Kaynağı:</strong> ${product.powerSupply}`;
+            } else {
+              document.getElementById('productPowerSupply').style.display = 'none';
+            }
+
+            if (product.graphicsCard) {
+              document.getElementById('productGraphicsCard').innerHTML = `<strong>Ekran Kartı:</strong> ${product.graphicsCard}`;
+            } else {
+              document.getElementById('productGraphicsCard').style.display = 'none';
+            }
+          } else {
+            document.getElementById('computerComponents').style.display = 'none';
+          }
+
+          // Çevre Birimleri
+          if (product.category === "Çevre Birimleri") {
+            document.getElementById('peripheralDetails').style.display = 'block';
+
+            if (product.peripheral) {
+              // Belirli bir çevre birimi seçildiğinde ilgili detayları göster
+              switch (product.peripheral) {
+                case "RAM":
+                  document.getElementById('peripheralRAM').style.display = 'block';
+                  if (product.ramDDR) {
+                    document.getElementById('productRamDDR').innerHTML = `<strong>DDR:</strong> ${product.ramDDR}`;
+                  } else {
+                    document.getElementById('productRamDDR').style.display = 'none';
+                  }
+
+                  if (product.ramGB) {
+                    document.getElementById('productRamGB').innerHTML = `<strong>RAM Kapasitesi (GB):</strong> ${product.ramGB}`;
+                  } else {
+                    document.getElementById('productRamGB').style.display = 'none';
+                  }
+
+                  if (product.ramMHz) {
+                    document.getElementById('productRamMHz').innerHTML = `<strong>RAM Hızı (MHz):</strong> ${product.ramMHz}`;
+                  } else {
+                    document.getElementById('productRamMHz').style.display = 'none';
+                  }
+
+                  if (product.ramType) {
+                    document.getElementById('productRamType').innerHTML = `<strong>RAM Tipi:</strong> ${product.ramType}`;
+                  } else {
+                    document.getElementById('productRamType').style.display = 'none';
+                  }
+
+                  if (product.ramBrand) {
+                    document.getElementById('productRamBrand').innerHTML = `<strong>RAM Markası:</strong> ${product.ramBrand}`;
+                  } else {
+                    document.getElementById('productRamBrand').style.display = 'none';
+                  }
+
+                  if (product.ramSlots) {
+                    document.getElementById('productRamSlots').innerHTML = `<strong>RAM Slotu Sayısı:</strong> ${product.ramSlots}`;
+                  } else {
+                    document.getElementById('productRamSlots').style.display = 'none';
+                  }
+
+                  if (product.maxRam) {
+                    document.getElementById('productMaxRam').innerHTML = `<strong>Maksimum RAM Desteği (GB):</strong> ${product.maxRam}`;
+                  } else {
+                    document.getElementById('productMaxRam').style.display = 'none';
+                  }
+
+                  if (product.maxRamMHz) {
+                    document.getElementById('productMaxRamMHz').innerHTML = `<strong>Maksimum RAM Hızı (MHz):</strong> ${product.maxRamMHz}`;
+                  } else {
+                    document.getElementById('productMaxRamMHz').style.display = 'none';
+                  }
+                  break;
+
+                case "Ekran Kartı":
+                  document.getElementById('peripheralGPU').style.display = 'block';
+                  if (product.gpuBrand) {
+                    document.getElementById('productGpuBrand').innerHTML = `<strong>GPU Markası:</strong> ${product.gpuBrand}`;
+                  } else {
+                    document.getElementById('productGpuBrand').style.display = 'none';
+                  }
+
+                  if (product.gpuModel) {
+                    document.getElementById('gpuModel').innerHTML = `<strong>GPU Modeli:</strong> ${product.gpuModel}`;
+                  } else {
+                    document.getElementById('gpuModel').style.display = 'none';
+                  }
+
+                  if (product.gpuVram) {
+                    document.getElementById('productGpuVram').innerHTML = `<strong>GPU VRAM (GB):</strong> ${product.gpuVram}`;
+                  } else {
+                    document.getElementById('productGpuVram').style.display = 'none';
+                  }
+
+                  if (product.gpuOutputs && product.gpuOutputs.length > 0) {
+                    let outputs = "<strong>Görüntü Çıkışları:</strong> ";
+                    outputs += product.gpuOutputs.map(output => `${output.type} (${output.count} adet)`).join(", ");
+                    document.getElementById('productGpuOutputs').innerHTML = outputs;
+                  } else {
+                    document.getElementById('productGpuOutputs').style.display = 'none';
+                  }
+
+                  if (product.gpuBitInput) {
+                    document.getElementById('productGpuBitInput').innerHTML = `<strong>Bit Girişi:</strong> ${product.gpuBitInput}`;
+                  } else {
+                    document.getElementById('productGpuBitInput').style.display = 'none';
+                  }
+                  break;
+
+                case "Monitör":
+                  document.getElementById('peripheralMonitor').style.display = 'block';
+                  if (product.monitorBrand) {
+                    document.getElementById('productMonitorBrand').innerHTML = `<strong>Monitör Markası:</strong> ${product.monitorBrand}`;
+                  } else {
+                    document.getElementById('productMonitorBrand').style.display = 'none';
+                  }
+
+                  if (product.monitorModel) {
+                    document.getElementById('productMonitorModel').innerHTML = `<strong>Monitör Modeli:</strong> ${product.monitorModel}`;
+                  } else {
+                    document.getElementById('productMonitorModel').style.display = 'none';
+                  }
+
+                  if (product.monitorResolution) {
+                    document.getElementById('monitorResolution').innerHTML = `<strong>Çözünürlük:</strong> ${product.monitorResolution}`;
+                  } else {
+                    document.getElementById('monitorResolution').style.display = 'none';
+                  }
+
+                  if (product.monitorInch) {
+                    document.getElementById('monitorInch').innerHTML = `<strong>İnç:</strong> ${product.monitorInch}`;
+                  } else {
+                    document.getElementById('monitorInch').style.display = 'none';
+                  }
+
+                  if (product.monitorHz) {
+                    document.getElementById('monitorHz').innerHTML = `<strong>Hz:</strong> ${product.monitorHz}`;
+                  } else {
+                    document.getElementById('monitorHz').style.display = 'none';
+                  }
+
+                  if (product.monitorOutputs && product.monitorOutputs.length > 0) {
+                    let monitorOuts = "<strong>Giriş/Çıkış Çıkışları:</strong> ";
+                    monitorOuts += product.monitorOutputs.map(output => `${output.type} (${output.count} adet)`).join(", ");
+                    document.getElementById('productMonitorOutputs').innerHTML = monitorOuts;
+                  } else {
+                    document.getElementById('productMonitorOutputs').style.display = 'none';
+                  }
+                  break;
+
+                case "İşlemci":
+                  document.getElementById('peripheralProcessor').style.display = 'block';
+                  if (product.processorBrand) {
+                    document.getElementById('productProcessorBrand').innerHTML = `<strong>İşlemci Markası:</strong> ${product.processorBrand} / ${product.processorSocketType}`;
+                  } else {
+                    document.getElementById('productProcessorBrand').style.display = 'none';
+                  }
+
+                  if (product.processorModel) {
+                    document.getElementById('productProcessorModel').innerHTML = `<strong>İşlemci Modeli:</strong> ${product.processorModel}`;
+                  } else {
+                    document.getElementById('productProcessorModel').style.display = 'none';
+                  }
+
+                  if (product.processorCores) {
+                    document.getElementById('productProcessorCores').innerHTML = `<strong>Çekirdek Sayısı:</strong> ${product.processorCores}`;
+                  } else {
+                    document.getElementById('productProcessorCores').style.display = 'none';
+                  }
+
+                  if (product.processorGHz) {
+                    document.getElementById('productProcessorGHz').innerHTML = `<strong>GHz Hızı:</strong> ${product.processorGHz}`;
+                  } else {
+                    document.getElementById('productProcessorGHz').style.display = 'none';
+                  }
+
+                  if (product.processorCache) {
+                    document.getElementById('productProcessorCache').innerHTML = `<strong>Önbellek (MB):</strong> ${product.processorCache}`;
+                  } else {
+                    document.getElementById('productProcessorCache').style.display = 'none';
+                  }
+                  break;
+
+                case "Depolama":
+                  document.getElementById('peripheralStorage').style.display = 'block';
+                  if (product.storageType) {
+                    document.getElementById('productStorageType').innerHTML = `<strong>Depolama Türü:</strong> ${product.storageType}`;
+                  } else {
+                    document.getElementById('productStorageType').style.display = 'none';
+                  }
+
+                  if (product.storageSize) {
+                    document.getElementById('productStorageSize').innerHTML = `<strong>Depolama Kapasitesi (GB):</strong> ${product.storageSize}`;
+                  } else {
+                    document.getElementById('productStorageSize').style.display = 'none';
+                  }
+
+                  if (product.storageBrand) {
+                    document.getElementById('productStorageBrand').innerHTML = `<strong>Depolama Markası:</strong> ${product.storageBrand}`;
+                  } else {
+                    document.getElementById('productStorageBrand').style.display = 'none';
+                  }
+
+                  if (product.storageReadSpeed) {
+                    document.getElementById('productStorageReadSpeed').innerHTML = `<strong>Okuma Hızı (MB/s):</strong> ${product.storageReadSpeed}`;
+                  } else {
+                    document.getElementById('productStorageReadSpeed').style.display = 'none';
+                  }
+
+                  if (product.storageWriteSpeed) {
+                    document.getElementById('productStorageWriteSpeed').innerHTML = `<strong>Yazma Hızı (MB/s):</strong> ${product.storageWriteSpeed}`;
+                  } else {
+                    document.getElementById('productStorageWriteSpeed').style.display = 'none';
+                  }
+                  break;
+
+                case "Anakart":
+                  document.getElementById('peripheralMotherboard').style.display = 'block';
+                  if (product.motherboardBrand) {
+                    document.getElementById('peripheralProductMotherboardBrand').innerHTML = `<strong>Anakart Markası:</strong> ${product.motherboardBrand}`;
+                  } else {
+                    document.getElementById('peripheralProductMotherboardBrand').style.display = 'none';
+                  }
+
+                  if (product.socketType) {
+                    document.getElementById('peripheralProductSocketType').innerHTML = `<strong>Soket Tipi:</strong> ${product.socketType}`;
+                  } else {
+                    document.getElementById('peripheralProductSocketType').style.display = 'none';
+                  }
+
+                  if (product.motherboardModel) {
+                    document.getElementById('peripheralProductMotherboardModel').innerHTML = `<strong>Anakart Modeli:</strong> ${product.motherboardModel}`;
+                  } else {
+                    document.getElementById('peripheralProductMotherboardModel').style.display = 'none';
+                  }
+
+                  if (product.m2Support !== undefined) {
+                    document.getElementById('peripheralProductM2Support').innerHTML = `<strong>M2 Desteği:</strong> ${product.m2Support ? 'Evet' : 'Hayır'}`;
+                  } else {
+                    document.getElementById('peripheralProductM2Support').style.display = 'none';
+                  }
+                  break;
+
+                case "Bilgisayar Kasa":
+                  document.getElementById('peripheralComputerCase').style.display = 'block';
+                  if (product.caseType) {
+                    document.getElementById('productCaseType').innerHTML = `<strong>Kasa Tipi:</strong> ${product.caseType}`;
+                  } else {
+                    document.getElementById('productCaseType').style.display = 'none';
+                  }
+
+                  if (product.caseStyle) {
+                    document.getElementById('productCaseStyle').innerHTML = `<strong>Kasa Stili:</strong> ${product.caseStyle}`;
+                  } else {
+                    document.getElementById('productCaseStyle').style.display = 'none';
+                  }
+
+                  if (product.powerSupplyWatt) {
+                    document.getElementById('productPowerSupplyWatt').innerHTML = `<strong>Power Supply Watt (W):</strong> ${product.powerSupplyWatt}`;
+                  } else {
+                    document.getElementById('productPowerSupplyWatt').style.display = 'none';
+                  }
+
+                  if (product.caseBrand) {
+                    document.getElementById('productCaseBrand').innerHTML = `<strong>Kasa Markası:</strong> ${product.caseBrand}`;
+                  } else {
+                    document.getElementById('productCaseBrand').style.display = 'none';
+                  }
+                  break;
+
+                case "Klavye":
+                  document.getElementById('peripheralKeyboard').style.display = 'block';
+                  if (product.keyboardBrand) {
+                    document.getElementById('productKeyboardBrand').innerHTML = `<strong>Klavye Markası:</strong> ${product.keyboardBrand}`;
+                  } else {
+                    document.getElementById('productKeyboardBrand').style.display = 'none';
+                  }
+
+                  if (product.keyboardModel) {
+                    document.getElementById('productKeyboardModel').innerHTML = `<strong>Klavye Modeli:</strong> ${product.keyboardModel}`;
+                  } else {
+                    document.getElementById('productKeyboardModel').style.display = 'none';
+                  }
+
+                  if (product.keyboardType) {
+                    document.getElementById('productKeyboardType').innerHTML = `<strong>Klavye Tipi:</strong> ${product.keyboardType}`;
+                  } else {
+                    document.getElementById('productKeyboardType').style.display = 'none';
+                  }
+                  break;
+
+                case "Mouse":
+                  document.getElementById('peripheralMouse').style.display = 'block';
+                  if (product.mouseBrand) {
+                    document.getElementById('productMouseBrand').innerHTML = `<strong>Mouse Markası:</strong> ${product.mouseBrand}`;
+                  } else {
+                    document.getElementById('productMouseBrand').style.display = 'none';
+                  }
+
+                  if (product.mouseModel) {
+                    document.getElementById('productMouseModel').innerHTML = `<strong>Mouse Modeli:</strong> ${product.mouseModel}`;
+                  } else {
+                    document.getElementById('productMouseModel').style.display = 'none';
+                  }
+
+                  if (product.mouseType) {
+                    document.getElementById('productMouseType').innerHTML = `<strong>Mouse Tipi:</strong> ${product.mouseType}`;
+                  } else {
+                    document.getElementById('productMouseType').style.display = 'none';
+                  }
+                  break;
+
+                default:
+                  // Diğer çevre birimleri için eklemeler yapılabilir
+                  break;
+              }
+            }
+          }
+
+          // Cisco Networks
+          if (product.category === "Cisco networks") {
+            document.getElementById('ciscoFields').style.display = 'block';
+
+            if (product.ciscoSubCategory) {
+              document.getElementById('ciscoSubCategory').innerHTML = `<strong>Alt Kategori:</strong> ${product.ciscoSubCategory}`;
+              switch (product.ciscoSubCategory) {
+                case "Switches":
+                  document.getElementById('ciscoSwitchesFields').style.display = 'block';
+                  if (product.ciscoSwitchModel) {
+                    document.getElementById('ciscoSwitchModel').innerHTML = `<strong>Switch Modeli:</strong> ${product.ciscoSwitchModel}`;
+                  } else {
+                    document.getElementById('ciscoSwitchModel').style.display = 'none';
+                  }
+                  break;
+                case "Routers":
+                  document.getElementById('ciscoRoutersFields').style.display = 'block';
+                  if (product.ciscoRouterModel) {
+                    document.getElementById('ciscoRouterModel').innerHTML = `<strong>Router Modeli:</strong> ${product.ciscoRouterModel}`;
+                  } else {
+                    document.getElementById('ciscoRouterModel').style.display = 'none';
+                  }
+                  break;
+                case "Access Points":
+                  document.getElementById('ciscoAccessPointsFields').style.display = 'block';
+                  if (product.ciscoAccessPointModel) {
+                    document.getElementById('ciscoAccessPointModel').innerHTML = `<strong>Access Point Modeli:</strong> ${product.ciscoAccessPointModel}`;
+                  } else {
+                    document.getElementById('ciscoAccessPointModel').style.display = 'none';
+                  }
+                  break;
+                default:
+                  // Diğer alt kategoriler için eklemeler yapılabilir
+                  break;
+              }
+            } else {
+              document.getElementById('ciscoSubCategory').style.display = 'none';
+            }
+          }
+
+          // Aruba Networks
+          if (product.category === "Aruba networks") {
+            document.getElementById('arubaFields').style.display = 'block';
+
+            if (product.arubaSubCategory) {
+              document.getElementById('arubaSubCategory').innerHTML = `<strong>Alt Kategori:</strong> ${product.arubaSubCategory}`;
+              switch (product.arubaSubCategory) {
+                case "Switches":
+                  document.getElementById('arubaSwitchesFields').style.display = 'block';
+                  if (product.arubaSwitchModel) {
+                    document.getElementById('arubaSwitchModel').innerHTML = `<strong>Switch Modeli:</strong> ${product.arubaSwitchModel}`;
+                  } else {
+                    document.getElementById('arubaSwitchModel').style.display = 'none';
+                  }
+                  break;
+                case "Wireless Access Points":
+                  document.getElementById('arubaWirelessAPFields').style.display = 'block';
+                  if (product.arubaWirelessAPModel) {
+                    document.getElementById('arubaWirelessAPModel').innerHTML = `<strong>Wireless Access Point Modeli:</strong> ${product.arubaWirelessAPModel}`;
+                  } else {
+                    document.getElementById('arubaWirelessAPModel').style.display = 'none';
+                  }
+                  break;
+                case "Network Management":
+                  document.getElementById('arubaNetworkMgmtFields').style.display = 'block';
+                  if (product.arubaNetworkMgmtModel) {
+                    document.getElementById('arubaNetworkMgmtModel').innerHTML = `<strong>Network Management Modeli:</strong> ${product.arubaNetworkMgmtModel}`;
+                  } else {
+                    document.getElementById('arubaNetworkMgmtModel').style.display = 'none';
+                  }
+                  break;
+                default:
+                  // Diğer alt kategoriler için eklemeler yapılabilir
+                  break;
+              }
+            } else {
+              document.getElementById('arubaSubCategory').style.display = 'none';
+            }
+          }
+
+          // Cisco Systems
+          if (product.category === "Cisco Systems") {
+            document.getElementById('ciscoSystemsFields').style.display = 'block';
+
+            if (product.ciscoSystemsSubCategory) {
+              document.getElementById('ciscoSystemsSubCategory').innerHTML = `<strong>Alt Kategori:</strong> ${product.ciscoSystemsSubCategory}`;
+              switch (product.ciscoSystemsSubCategory) {
+                case "Security":
+                  document.getElementById('ciscoSystemsSecurityFields').style.display = 'block';
+                  if (product.ciscoSystemsSecurityModel) {
+                    document.getElementById('ciscoSystemsSecurityModel').innerHTML = `<strong>Security Modeli:</strong> ${product.ciscoSystemsSecurityModel}`;
+                  } else {
+                    document.getElementById('ciscoSystemsSecurityModel').style.display = 'none';
+                  }
+                  break;
+                case "Collaboration":
+                  document.getElementById('ciscoSystemsCollaborationFields').style.display = 'block';
+                  if (product.ciscoSystemsCollaborationModel) {
+                    document.getElementById('ciscoSystemsCollaborationModel').innerHTML = `<strong>Collaboration Modeli:</strong> ${product.ciscoSystemsCollaborationModel}`;
+                  } else {
+                    document.getElementById('ciscoSystemsCollaborationModel').style.display = 'none';
+                  }
+                  break;
+                case "SD-WAN & Software-Defined Networking":
+                  document.getElementById('ciscoSystemsSDWANFields').style.display = 'block';
+                  if (product.ciscoSystemsSDWANModel) {
+                    document.getElementById('ciscoSystemsSDWANModel').innerHTML = `<strong>SD-WAN Modeli:</strong> ${product.ciscoSystemsSDWANModel}`;
+                  } else {
+                    document.getElementById('ciscoSystemsSDWANModel').style.display = 'none';
+                  }
+                  break;
+                case "Meraki MX":
+                  document.getElementById('ciscoSystemsMerakiMXFields').style.display = 'block';
+                  if (product.ciscoSystemsMerakiMXModel) {
+                    document.getElementById('ciscoSystemsMerakiMXModel').innerHTML = `<strong>Meraki MX Modeli:</strong> ${product.ciscoSystemsMerakiMXModel}`;
+                  } else {
+                    document.getElementById('ciscoSystemsMerakiMXModel').style.display = 'none';
+                  }
+                  break;
+                default:
+                  // Diğer alt kategoriler için eklemeler yapılabilir
+                  break;
+              }
+            } else {
+              document.getElementById('ciscoSystemsSubCategory').style.display = 'none';
+            }
+          }
+
+          // Sunucu
+          if (product.category === "Sunucu") {
+            document.getElementById('serverFields').style.display = 'block';
+
+            if (product.serverDetails) {
+              const serverDetails = product.serverDetails;
+
+              if (serverDetails.subCategory) {
+                document.getElementById('serverSubCategory').innerHTML = `<strong>Sunucu Alt Kategorisi:</strong> ${serverDetails.subCategory}`;
+                switch (serverDetails.subCategory) {
+                  case "Tower Server":
+                    document.getElementById('serverTowerFields').style.display = 'block';
+                    if (serverDetails.model) {
+                      document.getElementById('serverTowerModel').innerHTML = `<strong>Tower Server Modeli:</strong> ${serverDetails.model}`;
+                    } else {
+                      document.getElementById('serverTowerModel').style.display = 'none';
+                    }
+
+                    if (serverDetails.processor) {
+                      document.getElementById('serverProcessorTower').innerHTML = `<strong>İşlemci:</strong> ${serverDetails.processor}`;
+                    } else {
+                      document.getElementById('serverProcessorTower').style.display = 'none';
+                    }
+
+                    if (serverDetails.ram) {
+                      document.getElementById('serverRAMTower').innerHTML = `<strong>RAM:</strong> ${serverDetails.ram}`;
+                    } else {
+                      document.getElementById('serverRAMTower').style.display = 'none';
+                    }
+
+                    if (serverDetails.storage) {
+                      document.getElementById('serverStorageTower').innerHTML = `<strong>Depolama:</strong> ${serverDetails.storage}`;
+                    } else {
+                      document.getElementById('serverStorageTower').style.display = 'none';
+                    }
+                    break;
+
+                  case "Rack Server":
+                    document.getElementById('serverRackFields').style.display = 'block';
+                    if (serverDetails.model) {
+                      document.getElementById('serverRackModel').innerHTML = `<strong>Rack Server Modeli:</strong> ${serverDetails.model}`;
+                    } else {
+                      document.getElementById('serverRackModel').style.display = 'none';
+                    }
+
+                    if (serverDetails.processor) {
+                      document.getElementById('serverProcessorRack').innerHTML = `<strong>İşlemci:</strong> ${serverDetails.processor}`;
+                    } else {
+                      document.getElementById('serverProcessorRack').style.display = 'none';
+                    }
+
+                    if (serverDetails.ram) {
+                      document.getElementById('serverRAMRack').innerHTML = `<strong>RAM:</strong> ${serverDetails.ram}`;
+                    } else {
+                      document.getElementById('serverRAMRack').style.display = 'none';
+                    }
+
+                    if (serverDetails.storage) {
+                      document.getElementById('serverStorageRack').innerHTML = `<strong>Depolama:</strong> ${serverDetails.storage}`;
+                    } else {
+                      document.getElementById('serverStorageRack').style.display = 'none';
+                    }
+                    break;
+
+                  case "Blade Server":
+                    document.getElementById('serverBladeFields').style.display = 'block';
+                    if (serverDetails.model) {
+                      document.getElementById('serverBladeModel').innerHTML = `<strong>Blade Server Modeli:</strong> ${serverDetails.model}`;
+                    } else {
+                      document.getElementById('serverBladeModel').style.display = 'none';
+                    }
+
+                    if (serverDetails.processor) {
+                      document.getElementById('serverProcessorBlade').innerHTML = `<strong>İşlemci:</strong> ${serverDetails.processor}`;
+                    } else {
+                      document.getElementById('serverProcessorBlade').style.display = 'none';
+                    }
+
+                    if (serverDetails.ram) {
+                      document.getElementById('serverRAMBlade').innerHTML = `<strong>RAM:</strong> ${serverDetails.ram}`;
+                    } else {
+                      document.getElementById('serverRAMBlade').style.display = 'none';
+                    }
+
+                    if (serverDetails.storage) {
+                      document.getElementById('serverStorageBlade').innerHTML = `<strong>Depolama:</strong> ${serverDetails.storage}`;
+                    } else {
+                      document.getElementById('serverStorageBlade').style.display = 'none';
+                    }
+                    break;
+
+                  default:
+                    // Diğer sunucu alt kategorileri için eklemeler yapılabilir
+                    break;
+                }
+              } else {
+                document.getElementById('serverSubCategory').style.display = 'none';
+              }
+            } else {
+              document.getElementById('serverFields').style.display = 'none';
+            }
+          }
+
+          // Sunucu Çevre Birimleri
+          if (product.category === "Sunucu Çevre Birimleri") {
+            document.getElementById('serverPeripheralFields').style.display = 'block';
+
+            if (product.serverPeripherals) {
+              const peripherals = product.serverPeripherals;
+
+              if (peripherals.processor) {
+                document.getElementById('serverPeripheralFieldsCPU').style.display = 'block';
+                document.getElementById('serverPeripheralProcessorModel').innerHTML = `<strong>İşlemci Modeli:</strong> ${peripherals.processor.model || 'Belirtilmemiş'}`;
+                document.getElementById('serverPeripheralProcessorCores').innerHTML = `<strong>Çekirdek Sayısı:</strong> ${peripherals.processor.cores || 'Belirtilmemiş'}`;
+                document.getElementById('serverPeripheralProcessorGHz').innerHTML = `<strong>Temel GHz Hızı:</strong> ${peripherals.processor.ghz || 'Belirtilmemiş'}`;
+                document.getElementById('serverPeripheralProcessorTurboGHz').innerHTML = `<strong>Maksimum Turbo GHz Hızı:</strong> ${peripherals.processor.turboGhZ || 'Belirtilmemiş'}`;
+                document.getElementById('serverPeripheralProcessorTDP').innerHTML = `<strong>TDP (W):</strong> ${peripherals.processor.tdp || 'Belirtilmemiş'}`;
+              } else {
+                document.getElementById('serverPeripheralFieldsCPU').style.display = 'none';
+              }
+
+              if (peripherals.ram) {
+                document.getElementById('serverPeripheralFieldsRAM').style.display = 'block';
+                document.getElementById('serverPeripheralRAMCapacity').innerHTML = `<strong>RAM Kapasitesi (GB):</strong> ${peripherals.ram.capacityGB || 'Belirtilmemiş'}`;
+                document.getElementById('serverPeripheralRAMMHz').innerHTML = `<strong>RAM Hızı (MHz):</strong> ${peripherals.ram.mhz || 'Belirtilmemiş'}`;
+                document.getElementById('serverPeripheralRAMType').innerHTML = `<strong>RAM Tipi:</strong> ${peripherals.ram.type || 'Belirtilmemiş'}`;
+                document.getElementById('serverPeripheralRAMBrand').innerHTML = `<strong>RAM Markası:</strong> ${peripherals.ram.brand || 'Belirtilmemiş'}`;
+                document.getElementById('serverPeripheralRAMECC').innerHTML = `<strong>ECC Desteği:</strong> ${peripherals.ram.ecc ? 'Evet' : 'Hayır'}`;
+              } else {
+                document.getElementById('serverPeripheralFieldsRAM').style.display = 'none';
+              }
+
+              if (peripherals.storage) {
+                document.getElementById('serverPeripheralFieldsStorage').style.display = 'block';
+                document.getElementById('serverPeripheralStorageType').innerHTML = `<strong>Depolama Türü:</strong> ${peripherals.storage.type || 'Belirtilmemiş'}`;
+                document.getElementById('serverPeripheralStorageCapacity').innerHTML = `<strong>Depolama Kapasitesi (GB/TB):</strong> ${peripherals.storage.capacityGB || 'Belirtilmemiş'}`;
+                document.getElementById('serverPeripheralStorageBrand').innerHTML = `<strong>Depolama Markası:</strong> ${peripherals.storage.brand || 'Belirtilmemiş'}`;
+                document.getElementById('serverPeripheralStorageReadSpeed').innerHTML = `<strong>Okuma Hızı (MB/s):</strong> ${peripherals.storage.readSpeed || 'Belirtilmemiş'}`;
+                document.getElementById('serverPeripheralStorageWriteSpeed').innerHTML = `<strong>Yazma Hızı (MB/s):</strong> ${peripherals.storage.writeSpeed || 'Belirtilmemiş'}`;
+              } else {
+                document.getElementById('serverPeripheralFieldsStorage').style.display = 'none';
+              }
+
+              if (peripherals.motherboard) {
+                document.getElementById('serverPeripheralFieldsMotherboard').style.display = 'block';
+                document.getElementById('serverPeripheralMotherboardBrand').innerHTML = `<strong>Anakart Markası:</strong> ${peripherals.motherboard.brand || 'Belirtilmemiş'}`;
+                document.getElementById('serverPeripheralMotherboardSocket').innerHTML = `<strong>Soket Tipi:</strong> ${peripherals.motherboard.socketType || 'Belirtilmemiş'}`;
+                document.getElementById('serverPeripheralMotherboardModel').innerHTML = `<strong>Anakart Modeli:</strong> ${peripherals.motherboard.model || 'Belirtilmemiş'}`;
+                document.getElementById('serverPeripheralMotherboardM2').innerHTML = `<strong>M2 Desteği:</strong> ${peripherals.motherboard.m2Support ? 'Evet' : 'Hayır'}`;
+                document.getElementById('serverPeripheralMotherboardRAID').innerHTML = `<strong>RAID Desteği:</strong> ${peripherals.motherboard.raidSupport ? 'Evet' : 'Hayır'}`;
+              } else {
+                document.getElementById('serverPeripheralFieldsMotherboard').style.display = 'none';
+              }
+
+              if (peripherals.hdd) {
+                document.getElementById('serverPeripheralFieldsHDD').style.display = 'block';
+                document.getElementById('serverPeripheralHDD').innerHTML = `<strong>HDD Modeli:</strong> ${peripherals.hdd.model || 'Belirtilmemiş'}`;
+                document.getElementById('serverPeripheralHDDCapacity').innerHTML = `<strong>Kapasite (GB/TB):</strong> ${peripherals.hdd.capacityGB || 'Belirtilmemiş'}`;
+                document.getElementById('serverPeripheralHDDSpeed').innerHTML = `<strong>Hız (RPM):</strong> ${peripherals.hdd.speedRPM || 'Belirtilmemiş'}`;
+                document.getElementById('serverPeripheralHDDCache').innerHTML = `<strong>Cache Boyutu (MB):</strong> ${peripherals.hdd.cacheMB || 'Belirtilmemiş'}`;
+              } else {
+                document.getElementById('serverPeripheralFieldsHDD').style.display = 'none';
+              }
+
+              if (peripherals.raidController) {
+                document.getElementById('serverPeripheralFieldsRAID').style.display = 'block';
+                document.getElementById('serverPeripheralRAIDController').innerHTML = `<strong>RAID Controller Modeli:</strong> ${peripherals.raidController.model || 'Belirtilmemiş'}`;
+                document.getElementById('serverPeripheralRAIDLevels').innerHTML = `<strong>Desteklenen RAID Seviyeleri:</strong> ${peripherals.raidController.supportedRAIDLevels || 'Belirtilmemiş'}`;
+              } else {
+                document.getElementById('serverPeripheralFieldsRAID').style.display = 'none';
+              }
+
+              if (peripherals.networkCard) {
+                document.getElementById('serverPeripheralFieldsNetwork').style.display = 'block';
+                document.getElementById('serverPeripheralNetworkCard').innerHTML = `<strong>Network Card Modeli:</strong> ${peripherals.networkCard.model || 'Belirtilmemiş'}`;
+                document.getElementById('serverPeripheralNetworkSpeed').innerHTML = `<strong>Bağlantı Hızı (Gbps):</strong> ${peripherals.networkCard.speedGbps || 'Belirtilmemiş'}`;
+                document.getElementById('serverPeripheralNetworkPorts').innerHTML = `<strong>Port Sayısı:</strong> ${peripherals.networkCard.portCount || 'Belirtilmemiş'}`;
+                document.getElementById('serverPeripheralNetworkTechnologies').innerHTML = `<strong>Desteklenen Teknolojiler:</strong> ${peripherals.networkCard.technologies || 'Belirtilmemiş'}`;
+              } else {
+                document.getElementById('serverPeripheralFieldsNetwork').style.display = 'none';
+              }
+            } else {
+              document.getElementById('serverPeripheralFields').style.display = 'none';
+            }
+          }
+
+          // Bilgisayar Kasa
+          if (product.category === "Çevre Birimleri" && product.peripheral === "Bilgisayar Kasa") {
+            document.getElementById('peripheralComputerCase').style.display = 'block';
+
+            if (product.caseType) {
+              document.getElementById('productCaseType').innerHTML = `<strong>Kasa Tipi:</strong> ${product.caseType}`;
+            } else {
+              document.getElementById('productCaseType').style.display = 'none';
+            }
+
+            if (product.caseStyle) {
+              document.getElementById('productCaseStyle').innerHTML = `<strong>Kasa Stili:</strong> ${product.caseStyle}`;
+            } else {
+              document.getElementById('productCaseStyle').style.display = 'none';
+            }
+
+            if (product.powerSupplyWatt) {
+              document.getElementById('productPowerSupplyWatt').innerHTML = `<strong>Power Supply Watt (W):</strong> ${product.powerSupplyWatt}`;
+            } else {
+              document.getElementById('productPowerSupplyWatt').style.display = 'none';
+            }
+
+            if (product.caseBrand) {
+              document.getElementById('productCaseBrand').innerHTML = `<strong>Kasa Markası:</strong> ${product.caseBrand}`;
+            } else {
+              document.getElementById('productCaseBrand').style.display = 'none';
+            }
+          }
+          if (product.casePowerSupply) {
+  document.getElementById('productPowerSupplyWatt').innerHTML = `<strong>Power Supply Watt (W):</strong> ${product.casePowerWatt}`;
+  document.getElementById('productPowerSupplyWatt').style.display = 'block';
+} else {
+  document.getElementById('productPowerSupplyWatt').style.display = 'none';
+}
+
+          // Genel Anakart Bilgileri (Çevre Birimleri kategorisi dışındaki anakart bilgileri)
+          if (product.motherboardBrand && !bilgisayarKategorileri.includes(product.category) && product.category !== "Çevre Birimleri" && product.category !== "Cisco networks" && product.category !== "Aruba networks" && product.category !== "Cisco Systems" && product.category !== "Sunucu") {
+            if (document.getElementById('productMotherboardBrand')) {
+              document.getElementById('productMotherboardBrand').innerHTML = `<strong>Anakart Markası:</strong> ${product.motherboardBrand}`;
+            } else {
+              const motherboardBrandP = document.createElement('p');
+              motherboardBrandP.id = 'productMotherboardBrand';
+              motherboardBrandP.innerHTML = `<strong>Anakart Markası:</strong> ${product.motherboardBrand}`;
+              document.querySelector('.product-info').appendChild(motherboardBrandP);
+            }
+          }
+
+          if (product.socketType && !bilgisayarKategorileri.includes(product.category) && product.category !== "Çevre Birimleri" && product.category !== "Cisco networks" && product.category !== "Aruba networks" && product.category !== "Cisco Systems" && product.category !== "Sunucu") {
+            if (document.getElementById('productSocketType')) {
+              document.getElementById('productSocketType').innerHTML = `<strong>Soket Tipi:</strong> ${product.socketType}`;
+            } else {
+              const socketTypeP = document.createElement('p');
+              socketTypeP.id = 'productSocketType';
+              socketTypeP.innerHTML = `<strong>Soket Tipi:</strong> ${product.socketType}`;
+              document.querySelector('.product-info').appendChild(socketTypeP);
+            }
+          }
+
+          if (product.motherboardModel && !bilgisayarKategorileri.includes(product.category) && product.category !== "Çevre Birimleri" && product.category !== "Cisco networks" && product.category !== "Aruba networks" && product.category !== "Cisco Systems" && product.category !== "Sunucu") {
+            if (document.getElementById('productMotherboardModel')) {
+              document.getElementById('productMotherboardModel').innerHTML = `<strong>Anakart Modeli:</strong> ${product.motherboardModel}`;
+            } else {
+              const motherboardModelP = document.createElement('p');
+              motherboardModelP.id = 'productMotherboardModel';
+              motherboardModelP.innerHTML = `<strong>Anakart Modeli:</strong> ${product.motherboardModel}`;
+              document.querySelector('.product-info').appendChild(motherboardModelP);
+            }
+          }
+
+          if (product.m2Support !== undefined && !bilgisayarKategorileri.includes(product.category) && product.category !== "Çevre Birimleri" && product.category !== "Cisco networks" && product.category !== "Aruba networks" && product.category !== "Cisco Systems" && product.category !== "Sunucu") {
+            if (document.getElementById('productM2Support')) {
+              document.getElementById('productM2Support').innerHTML = `<strong>M2 Desteği:</strong> ${product.m2Support ? 'Evet' : 'Hayır'}`;
+            } else {
+              const m2SupportP = document.createElement('p');
+              m2SupportP.id = 'productM2Support';
+              m2SupportP.innerHTML = `<strong>M2 Desteği:</strong> ${product.m2Support ? 'Evet' : 'Hayır'}`;
+              document.querySelector('.product-info').appendChild(m2SupportP);
+            }
+          }
+
+          // Carousel Resimlerini Ekleyin
+          const carouselImages = document.getElementById('carouselImages');
+
+          if (product.image_urls && product.image_urls.length > 0) {
+            product.image_urls.forEach((url, index) => {
+              const activeClass = index === 0 ? 'active' : '';
+              carouselImages.innerHTML += `
+                <div class="carousel-item ${activeClass}">
+                  <img src="${url}" class="d-block w-100" alt="${product.name}">
+                </div>`;
+            });
+          } else {
+            // Eğer resim yoksa varsayılan bir resim ekleyebilirsiniz
+            carouselImages.innerHTML = `
+              <div class="carousel-item active">
+                <img src="default-image.jpg" class="d-block w-100" alt="Default Image">
+              </div>`;
+          }
+
+          // Satın Al Butonuna WhatsApp Mesajı Gönderme Özelliği Eklendi
+          const purchaseButton = document.getElementById('purchaseButton');
+          purchaseButton.addEventListener('click', function () {
+            // Mesajın hazırlanması
+            let message = `Merhaba,\n\n` +
+              `Satın almak istediğim ürün detayları aşağıda belirtilmiştir:\n\n` +
+              `Ürün Adı: ${product.name || 'Belirtilmemiş'}\n` +
+              `Fiyat: ₺${product.price || 'Belirtilmemiş'}\n` + // Fiyat eklendi
+              `Kategori: ${product.category || 'Belirtilmemiş'}\n` +
+              `${product.description ? `Açıklama: ${product.description}\n` : ''}`;
+
+            // Bilgisayar Bileşenleri
+            if (bilgisayarKategorileri.includes(product.category)) {
+              message += `\nİşlemci: ${product.processor || 'Belirtilmemiş'}\n`;
+              message += `RAM: ${product.ram || 'Belirtilmemiş'}\n`;
+              message += `SSD: ${product.ssd || 'Belirtilmemiş'}\n`;
+              message += `Anakart: ${product.motherboard || 'Belirtilmemiş'}\n`;
+              message += `Güç Kaynağı: ${product.powerSupply || 'Belirtilmemiş'}\n`;
+              message += `Ekran Kartı: ${product.graphicsCard || 'Belirtilmemiş'}\n`;
+            }
+
+            // Çevre Birimleri
+            if (product.category === "Çevre Birimleri") {
+              if (product.peripheral) {
+                message += `\nÇevre Birimi: ${product.peripheral}\n`;
+
+                switch (product.peripheral) {
+                  case "RAM":
+                    message += `DDR: ${product.ramDDR || 'Belirtilmemiş'}\n`;
+                    message += `RAM Kapasitesi (GB): ${product.ramGB || 'Belirtilmemiş'}\n`;
+                    message += `RAM Hızı (MHz): ${product.ramMHz || 'Belirtilmemiş'}\n`;
+                    message += `RAM Tipi: ${product.ramType || 'Belirtilmemiş'}\n`;
+                    message += `RAM Markası: ${product.ramBrand || 'Belirtilmemiş'}\n`;
+                    message += `RAM Slotu Sayısı: ${product.ramSlots || 'Belirtilmemiş'}\n`;
+                    message += `Maksimum RAM Desteği (GB): ${product.maxRam || 'Belirtilmemiş'}\n`;
+                    message += `Maksimum RAM Hızı (MHz): ${product.maxRamMHz || 'Belirtilmemiş'}\n`;
+                    break;
+                  case "Ekran Kartı":
+                    message += `GPU Markası: ${product.gpuBrand || 'Belirtilmemiş'}\n`;
+                    message += `GPU Modeli: ${product.gpuModel || 'Belirtilmemiş'}\n`;
+                    message += `GPU VRAM (GB): ${product.gpuVram || 'Belirtilmemiş'}\n`;
+                    if (product.gpuOutputs && product.gpuOutputs.length > 0) {
+                      const gpuOutputs = product.gpuOutputs.map(output => `${output.type} (${output.count} adet)`).join(", ");
+                      message += `Görüntü Çıkışları: ${gpuOutputs}\n`;
+                    }
+                    message += `Bit Girişi: ${product.gpuBitInput || 'Belirtilmemiş'}\n`;
+                    break;
+                  case "Monitör":
+                    message += `Monitör Markası: ${product.monitorBrand || 'Belirtilmemiş'}\n`;
+                    message += `Monitör Modeli: ${product.monitorModel || 'Belirtilmemiş'}\n`;
+                    message += `Çözünürlük: ${product.monitorResolution || 'Belirtilmemiş'}\n`;
+                    message += `İnç: ${product.monitorInch || 'Belirtilmemiş'}\n`;
+                    message += `Hz: ${product.monitorHz || 'Belirtilmemiş'}\n`;
+                    if (product.monitorOutputs && product.monitorOutputs.length > 0) {
+                      const monitorOutputs = product.monitorOutputs.map(output => `${output.type} (${output.count} adet)`).join(", ");
+                      message += `Giriş/Çıkış Çıkışları: ${monitorOutputs}\n`;
+                    }
+                    break;
+                  case "İşlemci":
+                    message += `İşlemci Markası: ${product.processorBrand || 'Belirtilmemiş'}\n`;
+                    message += `İşlemci Modeli: ${product.processorModel || 'Belirtilmemiş'}\n`;
+                    message += `Soket Tipi: ${product.processorSocketType || 'Belirtilmemiş'}\n`;
+                    message += `Çekirdek Sayısı: ${product.processorCores || 'Belirtilmemiş'}\n`;
+                    message += `GHz Hızı: ${product.processorGHz || 'Belirtilmemiş'}\n`;
+                    message += `Önbellek (MB): ${product.processorCache || 'Belirtilmemiş'}\n`;
+                    break;
+                  case "Depolama":
+                    message += `Depolama Türü: ${product.storageType || 'Belirtilmemiş'}\n`;
+                    message += `Depolama Kapasitesi (GB): ${product.storageSize || 'Belirtilmemiş'}\n`;
+                    message += `Depolama Markası: ${product.storageBrand || 'Belirtilmemiş'}\n`;
+                    message += `Okuma Hızı (MB/s): ${product.storageReadSpeed || 'Belirtilmemiş'}\n`;
+                    message += `Yazma Hızı (MB/s): ${product.storageWriteSpeed || 'Belirtilmemiş'}\n`;
+                    break;
+                  case "Anakart":
+                    message += `Anakart Markası: ${product.motherboardBrand || 'Belirtilmemiş'}\n`;
+                    message += `Soket Tipi: ${product.socketType || 'Belirtilmemiş'}\n`;
+                    message += `Anakart Modeli: ${product.motherboardModel || 'Belirtilmemiş'}\n`;
+                    message += `M2 Desteği: ${product.m2Support !== undefined ? (product.m2Support ? 'Evet' : 'Hayır') : 'Belirtilmemiş'}\n`;
+                    break;
+                  case "Bilgisayar Kasa":
+                    message += `\nKasa Tipi: ${product.caseType || 'Belirtilmemiş'}\n`;
+                    message += `Kasa Stili: ${product.caseStyle || 'Belirtilmemiş'}\n`;
+                    message += `Power Supply Watt (W): ${product.powerSupplyWatt || 'Belirtilmemiş'}\n`;
+                    message += `Kasa Markası: ${product.caseBrand || 'Belirtilmemiş'}\n`;
+                    break;
+                  case "Klavye":
+                    message += `Klavye Markası: ${product.keyboardBrand || 'Belirtilmemiş'}\n`;
+                    message += `Klavye Modeli: ${product.keyboardModel || 'Belirtilmemiş'}\n`;
+                    message += `Klavye Tipi: ${product.keyboardType || 'Belirtilmemiş'}\n`;
+                    break;
+                  case "Mouse":
+                    message += `Mouse Markası: ${product.mouseBrand || 'Belirtilmemiş'}\n`;
+                    message += `Mouse Modeli: ${product.mouseModel || 'Belirtilmemiş'}\n`;
+                    message += `Mouse Tipi: ${product.mouseType || 'Belirtilmemiş'}\n`;
+                    break;
+                  default:
+                    // Diğer çevre birimleri için eklemeler yapılabilir
+                    break;
+                }
+              }
+            }
+
+            // Cisco Networks
+            if (product.category === "Cisco networks") {
+              if (product.ciscoSubCategory) {
+                message += `\nAlt Kategori: ${product.ciscoSubCategory}\n`;
+                switch (product.ciscoSubCategory) {
+                  case "Switches":
+                    message += `Switch Modeli: ${product.ciscoSwitchModel || 'Belirtilmemiş'}\n`;
+                    break;
+                  case "Routers":
+                    message += `Router Modeli: ${product.ciscoRouterModel || 'Belirtilmemiş'}\n`;
+                    break;
+                  case "Access Points":
+                    message += `Access Point Modeli: ${product.ciscoAccessPointModel || 'Belirtilmemiş'}\n`;
+                    break;
+                  default:
+                    // Diğer alt kategoriler için eklemeler yapılabilir
+                    break;
+                }
+              }
+            }
+
+            // Aruba Networks
+            if (product.category === "Aruba networks") {
+              if (product.arubaSubCategory) {
+                message += `\nAlt Kategori: ${product.arubaSubCategory}\n`;
+                switch (product.arubaSubCategory) {
+                  case "Switches":
+                    message += `Switch Modeli: ${product.arubaSwitchModel || 'Belirtilmemiş'}\n`;
+                    break;
+                  case "Wireless Access Points":
+                    message += `Wireless Access Point Modeli: ${product.arubaWirelessAPModel || 'Belirtilmemiş'}\n`;
+                    break;
+                  case "Network Management":
+                    message += `Network Management Modeli: ${product.arubaNetworkMgmtModel || 'Belirtilmemiş'}\n`;
+                    break;
+                  default:
+                    // Diğer alt kategoriler için eklemeler yapılabilir
+                    break;
+                }
+              }
+            }
+
+            // Cisco Systems
+            if (product.category === "Cisco Systems") {
+              if (product.ciscoSystemsSubCategory) {
+                message += `\nAlt Kategori: ${product.ciscoSystemsSubCategory}\n`;
+                switch (product.ciscoSystemsSubCategory) {
+                  case "Security":
+                    message += `Security Modeli: ${product.ciscoSystemsSecurityModel || 'Belirtilmemiş'}\n`;
+                    break;
+                  case "Collaboration":
+                    message += `Collaboration Modeli: ${product.ciscoSystemsCollaborationModel || 'Belirtilmemiş'}\n`;
+                    break;
+                  case "SD-WAN & Software-Defined Networking":
+                    message += `SD-WAN Modeli: ${product.ciscoSystemsSDWANModel || 'Belirtilmemiş'}\n`;
+                    break;
+                  case "Meraki MX":
+                    message += `Meraki MX Modeli: ${product.ciscoSystemsMerakiMXModel || 'Belirtilmemiş'}\n`;
+                    break;
+                  default:
+                    // Diğer alt kategoriler için eklemeler yapılabilir
+                    break;
+                }
+              }
+            }
+
+            // Sunucu
+            if (product.category === "Sunucu") {
+              if (product.serverDetails) {
+                const serverDetails = product.serverDetails;
+                message += `\nSunucu Alt Kategorisi: ${serverDetails.subCategory || 'Belirtilmemiş'}\n`;
+                message += `Sunucu Modeli: ${serverDetails.model || 'Belirtilmemiş'}\n`;
+                message += `İşlemci: ${serverDetails.processor || 'Belirtilmemiş'}\n`;
+                message += `RAM: ${serverDetails.ram || 'Belirtilmemiş'}\n`;
+                message += `Depolama: ${serverDetails.storage || 'Belirtilmemiş'}\n`;
+              }
+            }
+
+            // Sunucu Çevre Birimleri
+            if (product.category === "Sunucu Çevre Birimleri") {
+              if (product.serverPeripherals) {
+                const peripherals = product.serverPeripherals;
+                message += `\nSunucu Çevre Birimi:\n`;
+
+                if (peripherals.processor) {
+                  message += `- İşlemci Modeli: ${peripherals.processor.model || 'Belirtilmemiş'}\n`;
+                  message += `  Çekirdek Sayısı: ${peripherals.processor.cores || 'Belirtilmemiş'}\n`;
+                  message += `  Temel GHz Hızı: ${peripherals.processor.ghz || 'Belirtilmemiş'}\n`;
+                  message += `  Maksimum Turbo GHz Hızı: ${peripherals.processor.turboGhZ || 'Belirtilmemiş'}\n`;
+                  message += `  TDP (W): ${peripherals.processor.tdp || 'Belirtilmemiş'}\n`;
+                }
+
+                if (peripherals.ram) {
+                  message += `- RAM Kapasitesi (GB): ${peripherals.ram.capacityGB || 'Belirtilmemiş'}\n`;
+                  message += `  RAM Hızı (MHz): ${peripherals.ram.mhz || 'Belirtilmemiş'}\n`;
+                  message += `  RAM Tipi: ${peripherals.ram.type || 'Belirtilmemiş'}\n`;
+                  message += `  RAM Markası: ${peripherals.ram.brand || 'Belirtilmemiş'}\n`;
+                  message += `  ECC Desteği: ${peripherals.ram.ecc ? 'Evet' : 'Hayır'}\n`;
+                }
+
+                if (peripherals.storage) {
+                  message += `- Depolama Türü: ${peripherals.storage.type || 'Belirtilmemiş'}\n`;
+                  message += `  Depolama Kapasitesi (GB/TB): ${peripherals.storage.capacityGB || 'Belirtilmemiş'}\n`;
+                  message += `  Depolama Markası: ${peripherals.storage.brand || 'Belirtilmemiş'}\n`;
+                  message += `  Okuma Hızı (MB/s): ${peripherals.storage.readSpeed || 'Belirtilmemiş'}\n`;
+                  message += `  Yazma Hızı (MB/s): ${peripherals.storage.writeSpeed || 'Belirtilmemiş'}\n`;
+                }
+
+                if (peripherals.motherboard) {
+                  message += `- Anakart Markası: ${peripherals.motherboard.brand || 'Belirtilmemiş'}\n`;
+                  message += `  Soket Tipi: ${peripherals.motherboard.socketType || 'Belirtilmemiş'}\n`;
+                  message += `  Anakart Modeli: ${peripherals.motherboard.model || 'Belirtilmemiş'}\n`;
+                  message += `  M2 Desteği: ${peripherals.motherboard.m2Support ? 'Evet' : 'Hayır'}\n`;
+                  message += `  RAID Desteği: ${peripherals.motherboard.raidSupport ? 'Evet' : 'Hayır'}\n`;
+                }
+
+                if (peripherals.hdd) {
+                  message += `- HDD Modeli: ${peripherals.hdd.model || 'Belirtilmemiş'}\n`;
+                  message += `  Kapasite (GB/TB): ${peripherals.hdd.capacityGB || 'Belirtilmemiş'}\n`;
+                  message += `  Hız (RPM): ${peripherals.hdd.speedRPM || 'Belirtilmemiş'}\n`;
+                  message += `  Cache Boyutu (MB): ${peripherals.hdd.cacheMB || 'Belirtilmemiş'}\n`;
+                }
+
+                if (peripherals.raidController) {
+                  message += `- RAID Controller Modeli: ${peripherals.raidController.model || 'Belirtilmemiş'}\n`;
+                  message += `  Desteklenen RAID Seviyeleri: ${peripherals.raidController.supportedRAIDLevels || 'Belirtilmemiş'}\n`;
+                }
+
+                if (peripherals.networkCard) {
+                  message += `- Network Card Modeli: ${peripherals.networkCard.model || 'Belirtilmemiş'}\n`;
+                  message += `  Bağlantı Hızı (Gbps): ${peripherals.networkCard.speedGbps || 'Belirtilmemiş'}\n`;
+                  message += `  Port Sayısı: ${peripherals.networkCard.portCount || 'Belirtilmemiş'}\n`;
+                  message += `  Desteklenen Teknolojiler: ${peripherals.networkCard.technologies || 'Belirtilmemiş'}\n`;
+                }
+              }
+            }
+
+            // Bilgisayar Kasa
+            if (product.category === "Çevre Birimleri" && product.peripheral === "Bilgisayar Kasa") {
+              if (product.caseType) {
+                message += `\nKasa Tipi: ${product.caseType || 'Belirtilmemiş'}\n`;
+              }
+
+              if (product.caseStyle) {
+                message += `Kasa Stili: ${product.caseStyle || 'Belirtilmemiş'}\n`;
+              }
+
+              if (product.powerSupplyWatt) {
+                message += `Power Supply Watt (W): ${product.powerSupplyWatt || 'Belirtilmemiş'}\n`;
+              }
+
+              if (product.caseBrand) {
+                message += `Kasa Markası: ${product.caseBrand || 'Belirtilmemiş'}\n`;
+              }
+            }
+
+            
+
+            // Satın Al Butonuna WhatsApp Mesajı Gönderme Özelliği Eklendi
+            const encodedMessage = encodeURIComponent(message);
+
+            // WhatsApp URL'si
+            const whatsappURL = `https://wa.me/905539820188?text=${encodedMessage}`;
+
+            // WhatsApp'ı yeni sekmede aç
+            window.open(whatsappURL, '_blank');
+          });
+
+        } else {
+          alert('Ürün bulunamadı.');
+        }
+      } catch (error) {
+        console.error('Ürün detayları alınırken bir hata oluştu:', error);
+        alert('Ürün detayları alınırken bir hata oluştu. Lütfen daha sonra tekrar deneyiniz.');
+      }
+    }
+
+    window.onload = fetchProductDetails;
+  </script>
+
+</body>
+
+</html>

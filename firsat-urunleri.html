@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="tr">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ürün Listesi</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Favicon -->
+  <link rel="shortcut icon" type="image/png" href="favicon.png" />
+  <!-- Custom Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+
+  <!-- Firebase Configuration and Scripts -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, query } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCYOOa5J3U6k_kVM721xF7LCoxWY6EsE7Q",
+      authDomain: "electronic-b4925.firebaseapp.com",
+      projectId: "electronic-b4925",
+      storageBucket: "electronic-b4925.appspot.com",
+      messagingSenderId: "904593171488",
+      appId: "1:904593171488:web:3a8f5967cad2bd7bbac845",
+      measurementId: "G-BSXFE5FHJV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let allProducts = [];
+
+    async function fetchProducts() {
+      const productsCollection = collection(db, "products");
+      const querySnapshot = await getDocs(query(productsCollection));
+      const tableBody = document.getElementById("productsTableBody");
+      tableBody.innerHTML = ''; // Clear current products
+
+      allProducts = []; // Reset products array
+
+      querySnapshot.forEach((doc) => {
+        const product = doc.data();
+
+        // Only include products where `firsatUrunleri` is true
+        if (product.firsatUrunleri === true) {
+          const productName = product.name || "Bilinmeyen Ürün";
+          const productPrice = product.price ? `${product.price}₺` : "Fiyat Bilinmiyor";
+          const productCategory = product.category || "Kategori: Bilinmiyor";
+          const imageUrls = product.image_urls || [];
+          const productPeripheral = product.peripheral;
+
+          let productObj = {
+            name: productName.toLowerCase(),
+            category: productCategory.toLowerCase(),
+            html:
+              `<div class="col-lg-3 col-md-4 col-sm-6 mb-4 d-flex align-items-stretch">
+                <div class="card h-100 shadow-sm product-card border-0">
+                  <a href="urunDetay.html?id=${doc.id}" class="text-decoration-none text-dark">
+                    <div class="position-relative">
+                      <img src="${imageUrls[0] || 'default-image.jpg'}" class="card-img-top rounded-top" alt="${productName}" style="height: 200px; object-fit: contain;">
+                      ${
+                        productPeripheral
+                          ? `<span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">${productPeripheral}</span>`
+                          : `<span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">${productCategory}</span>`
+                      }
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                      <h5 class="card-title fw-bold">${productName}</h5>
+                      <p class="card-text text-muted mb-2">${productCategory}</p>
+                      <div class="mt-auto">
+                        <p class="card-text fs-5 text-danger">${productPrice}</p>
+                        <button class="btn btn-outline-warning w-100">
+                          Detayları Gör <i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </a>
+                </div>
+              </div>`
+          };
+
+          allProducts.push(productObj);
+          tableBody.innerHTML += productObj.html;
+        }
+      });
+
+      addCarouselHoverEffect();
+    }
+
+    function filterProducts() {
+      const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+      const filteredProducts = allProducts.filter(product =>
+        product.name.includes(searchTerm) || product.category.includes(searchTerm)
+      );
+
+      const tableBody = document.getElementById("productsTableBody");
+      tableBody.innerHTML = ''; // Clear existing products
+
+      filteredProducts.forEach(product => {
+        tableBody.innerHTML += product.html;
+      });
+
+      addCarouselHoverEffect();
+    }
+
+    function addCarouselHoverEffect() {
+      document.querySelectorAll('.carousel').forEach(carousel => {
+        let carouselInstance = new bootstrap.Carousel(carousel, {
+          interval: false,
+          ride: false
+        });
+
+        let hoverInterval;
+
+        const cardElement = carousel.closest('.product-card');
+        if (cardElement) {
+          cardElement.addEventListener('mouseenter', () => {
+            if (!hoverInterval) {
+              hoverInterval = setInterval(() => {
+                carouselInstance.next();
+              }, 2000);
+            }
+          });
+
+          cardElement.addEventListener('mouseleave', () => {
+            if (hoverInterval) {
+              clearInterval(hoverInterval);
+              hoverInterval = null;
+            }
+            carouselInstance.to(0);
+          });
+        }
+
+        carousel.querySelectorAll('.carousel-indicators button').forEach((indicator, index) => {
+          indicator.addEventListener('mouseenter', () => {
+            carouselInstance.to(index);
+          });
+        });
+      });
+    }
+
+    function adjustPlaceholder() {
+      const searchInput = document.getElementById("searchInput");
+      const width = window.innerWidth;
+
+      if (width >= 1600) {
+        searchInput.placeholder = "Aramak istediğiniz ürünü giriniz...";
+      } else if (width >= 1200) {
+        searchInput.placeholder = "Aramak istediğiniz ürünü giriniz...";
+      } else if (width >= 768) {
+        searchInput.placeholder = "Ürün Ara...";
+      } else {
+        searchInput.placeholder = "Ara...";
+      }
+    }
+
+    window.onload = function () {
+      fetchProducts(); 
+      document.getElementById("searchInput").addEventListener("input", filterProducts); 
+      adjustPlaceholder(); 
+      window.addEventListener('resize', adjustPlaceholder); 
+    }
+  </script>
+
+  <style>
+    /* Add your CSS styles here */
+  </style>
+
+</head>
+
+<body style="background-color: rgba(227, 222, 222, 0.473);">
+  <!-- Navbar and Search bar code here -->
+
+  <!-- Product List -->
+  <div class="container mt-5">
+    <h2 class="mb-4 text-center">Ürün Listesi</h2>
+    <div class="row" id="productsTableBody"></div>
+  </div>
+
+  <!-- Bootstrap Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Dropdown close functionality -->
+  <script>
+    document.querySelectorAll('.offcanvas .dropdown-menu a').forEach(function(element) {
+      element.addEventListener('click', function() {
+        var offcanvasElement = document.getElementById('offcanvasNavbar');
+        var offcanvas = bootstrap.Offcanvas.getInstance(offcanvasElement);
+        if (offcanvas) {
+          offcanvas.hide();
+        }
+      });
+    });
+
+    document.querySelectorAll('.dropdown-menu a').forEach(function(element) {
+      element.addEventListener('click', function() {
+        var dropdownToggle = this.closest('.dropdown').querySelector('.dropdown-toggle');
+        var dropdown = bootstrap.Dropdown.getInstance(dropdownToggle);
+        if (dropdown) {
+          dropdown.hide();
+        }
+      });
+    });
+  </script>
+
+</body>
+
+</html>

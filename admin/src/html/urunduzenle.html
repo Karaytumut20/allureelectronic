@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ürün Listesi</title>
+  <link rel="shortcut icon" type="image/png" href="../assets/images/logos/favicon.png" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <style>
+    /* Carousel kontrol butonları için özelleştirme */
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+      background-color: rgba(0,0,0,0.5);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .carousel-control-prev-icon::after,
+    .carousel-control-next-icon::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      border-top: 2px solid white;
+      border-right: 2px solid white;
+      transform: rotate(45deg);
+    }
+
+    .carousel-control-next-icon::after {
+      transform: rotate(-135deg);
+    }
+
+    .nav-link {
+      color: white !important;
+    }
+
+    /* Mobilde tabloyu daha iyi göstermek için */
+    @media (max-width: 576px) {
+      .table-responsive {
+        font-size: 0.9rem;
+      }
+
+      .carousel-item img {
+        max-height: 150px;
+      }
+
+      /* Metin taşmalarını önlemek için */
+      .table-responsive table {
+        white-space: nowrap;
+      }
+
+      .table td, .table th {
+        word-wrap: break-word;
+        word-break: break-all;
+      }
+
+      /* Açıklama sütununu mobilde gizlemek */
+      .table th.description,
+      .table td.description {
+        display: none;
+      }
+    }
+
+    /* Genel tablo stilleri */
+    .table th, .table td {
+      vertical-align: middle;
+      text-align: center;
+    }
+
+    /* Modal içindeki carousel için stil */
+    .modal-carousel img {
+      max-height: 300px;
+      object-fit: contain;
+    }
+  </style>
+
+  <!-- Firebase Konfigürasyonu ve Scriptler -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc, getDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCYOOa5J3U6k_kVM721xF7LCoxWY6EsE7Q",
+        authDomain: "electronic-b4925.firebaseapp.com",
+        projectId: "electronic-b4925",
+        storageBucket: "electronic-b4925.appspot.com",
+        messagingSenderId: "904593171488",
+        appId: "1:904593171488:web:3a8f5967cad2bd7bbac845",
+        measurementId: "G-BSXFE5FHJV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    // Ürünleri listeleme
+    async function fetchProducts() {
+      const querySnapshot = await getDocs(collection(db, "products"));
+      const tableBody = document.getElementById("productsTableBody");
+      tableBody.innerHTML = '';
+
+      querySnapshot.forEach((doc) => {
+        const product = doc.data();
+        const imageUrls = product.image_urls || [];
+
+        let carouselIndicators = '';
+        let carouselImages = '';
+
+        imageUrls.forEach((url, index) => {
+          carouselIndicators += `
+            <button type="button" data-bs-target="#carousel${doc.id}" data-bs-slide-to="${index}" class="${index === 0 ? 'active' : ''}" aria-current="${index === 0 ? 'true' : 'false'}" aria-label="Slide ${index + 1}"></button>
+          `;
+          carouselImages += `
+            <div class="carousel-item ${index === 0 ? 'active' : ''}">
+              <img src="${url}" class="d-block w-100 img-fluid" alt="${product.name}" style="max-height: 200px; object-fit: contain;">
+            </div>
+          `;
+        });
+
+        const productRow = `
+          <tr>
+            <td style="width: 400px;">
+              <div id="carousel${doc.id}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
+                <div class="carousel-indicators">
+                  ${carouselIndicators}
+                </div>
+                <div class="carousel-inner">
+                  ${carouselImages}
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carousel${doc.id}" data-bs-slide="prev">
+                  <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                  <span class="visually-hidden">Önceki</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carousel${doc.id}" data-bs-slide="next">
+                  <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                  <span class="visually-hidden">Sonraki</span>
+                </button>
+              </div>
+            </td>
+            <td>${product.name}</td>
+            <td>$${product.price.toFixed(2)}</td>
+            <td class="description">${product.description || 'Açıklama mevcut değil'}</td>
+            <td>
+              <button class="btn btn-warning btn-sm mb-1 w-100" onclick="openEditModal('${doc.id}')">Düzenle</button>
+              <button class="btn btn-danger btn-sm w-100" onclick="deleteProduct('${doc.id}')">Sil</button>
+            </td>
+          </tr>
+        `;
+
+        tableBody.innerHTML += productRow;
+      });
+    }
+
+    // Modal açıldığında ürün bilgilerini doldur
+    async function openEditModal(productId) {
+      const productRef = doc(db, "products", productId);
+      const productDoc = await getDoc(productRef);
+
+      if (productDoc.exists()) {
+        const product = productDoc.data();
+
+        document.getElementById('productId').value = productId;
+        document.getElementById('productName').value = product.name || '';
+        document.getElementById('productPrice').value = product.price || '';
+        document.getElementById('productDescription').value = product.description || '';
+
+        // Mevcut resimleri göster
+        const imageContainer = document.getElementById('existingImages');
+        imageContainer.innerHTML = '';
+
+        const imageUrls = product.image_urls || [];
+        if (imageUrls.length > 0) {
+          const carouselId = `editCarousel${productId}`;
+          let indicators = '';
+          let images = '';
+
+          imageUrls.forEach((url, index) => {
+            indicators += `
+              <button type="button" data-bs-target="#${carouselId}" data-bs-slide-to="${index}" class="${index === 0 ? 'active' : ''}" aria-current="${index === 0 ? 'true' : 'false'}" aria-label="Slide ${index + 1}"></button>
+            `;
+            images += `
+              <div class="carousel-item ${index === 0 ? 'active' : ''}">
+                <img src="${url}" class="d-block w-100 img-fluid" alt="${product.name}" style="max-height: 200px; object-fit: contain;">
+              </div>
+            `;
+          });
+
+          const carouselHtml = `
+            <div id="${carouselId}" class="carousel slide modal-carousel mb-3" data-bs-ride="carousel" data-bs-interval="3000">
+              <div class="carousel-indicators">
+                ${indicators}
+              </div>
+              <div class="carousel-inner">
+                ${images}
+              </div>
+              <button class="carousel-control-prev" type="button" data-bs-target="#${carouselId}" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Önceki</span>
+              </button>
+              <button class="carousel-control-next" type="button" data-bs-target="#${carouselId}" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Sonraki</span>
+              </button>
+            </div>
+          `;
+          imageContainer.innerHTML = carouselHtml;
+        } else {
+          imageContainer.innerHTML = '<p>Resim mevcut değil.</p>';
+        }
+
+        // Ek alanları göster/gizle
+        const optionalFields = ['processor', 'ram', 'ssd', 'motherboard', 'powerSupply', 'graphicsCard', 'gpuModel', 'monitorResolution', 'monitorInch', 'monitorHz'];
+
+        optionalFields.forEach(field => {
+          const inputElement = document.getElementById(field);
+          const fieldWrapper = document.getElementById(`${field}Wrapper`);
+
+          if (product[field]) {
+            fieldWrapper.style.display = 'block';
+            inputElement.value = product[field];
+          } else {
+            fieldWrapper.style.display = 'none';
+          }
+        });
+
+        var editModal = new bootstrap.Modal(document.getElementById('editProductModal'));
+        editModal.show();
+      }
+    }
+
+    // Ürünü güncelle Firebase'e gönder
+    async function updateProduct() {
+      const id = document.getElementById('productId').value;
+      const name = document.getElementById('productName').value;
+      const price = parseFloat(document.getElementById('productPrice').value); // Price'ı number olarak gönderiyoruz
+      const description = document.getElementById('productDescription').value;
+
+      // Ek alanlar (Firebase'de varsa güncellenecek)
+      const processor = document.getElementById('processor').value;
+      const ram = document.getElementById('ram').value;
+      const ssd = document.getElementById('ssd').value;
+      const motherboard = document.getElementById('motherboard').value;
+      const powerSupply = document.getElementById('powerSupply').value;
+      const graphicsCard = document.getElementById('graphicsCard').value;
+      const gpuModel = document.getElementById('gpuModel').value;
+      const monitorResolution = document.getElementById('monitorResolution').value;
+      const monitorInch = document.getElementById('monitorInch').value;
+      const monitorHz = document.getElementById('monitorHz').value;
+
+      // Yeni resim dosyalarını yüklemek için
+      const imageInput = document.getElementById('newImages');
+      const files = imageInput.files;
+
+      // Mevcut Firestore ürün belgesine erişim
+      const productRef = doc(db, "products", id);
+
+      // Güncellenmesi gereken verileri dinamik olarak oluşturuyoruz
+      let updatedData = {
+        name: name,
+        price: price,
+        description: description
+      };
+
+      // Sadece dolu alanları ekliyoruz
+      if (processor) updatedData.processor = processor;
+      if (ram) updatedData.ram = ram;
+      if (ssd) updatedData.ssd = ssd;
+      if (motherboard) updatedData.motherboard = motherboard;
+      if (powerSupply) updatedData.powerSupply = powerSupply;
+      if (graphicsCard) updatedData.graphicsCard = graphicsCard;
+      if (gpuModel) updatedData.gpuModel = gpuModel;
+      if (monitorResolution) updatedData.monitorResolution = monitorResolution;
+      if (monitorInch) updatedData.monitorInch = monitorInch;
+      if (monitorHz) updatedData.monitorHz = monitorHz;
+
+      // Yeni resimler yüklenmişse
+      if (files.length > 0) {
+        const storageRef = ref(storage, `product_images/${id}/${Date.now()}_${files[0].name}`);
+        try {
+          // Resimleri Firebase Storage'a yükleme
+          const uploadResult = await uploadBytes(storageRef, files[0]);
+          const downloadURL = await getDownloadURL(uploadResult.ref);
+
+          // Firestore'da image_urls alanına yeni URL'yi ekleme
+          updatedData.image_urls = arrayUnion(downloadURL);
+        } catch (error) {
+          console.error("Resim yüklenirken bir hata oluştu:", error);
+          alert('Resim yüklenirken bir hata oluştu.');
+          return;
+        }
+      }
+
+      try {
+        // Ürün bilgilerini Firebase'e güncelle
+        await updateDoc(productRef, updatedData);
+
+        alert('Ürün başarıyla güncellendi!');
+        fetchProducts(); // Sayfayı yeniden yükleyerek ürünleri güncelle
+        var editModal = bootstrap.Modal.getInstance(document.getElementById('editProductModal'));
+        editModal.hide();
+      } catch (error) {
+        console.error("Ürün güncellenirken bir hata oluştu:", error);
+        alert('Ürün güncellenirken bir hata oluştu.');
+      }
+    }
+
+    // Ürünü sil Firebase'den
+    async function deleteProduct(id) {
+      if (confirm("Bu ürünü silmek istediğinizden emin misiniz?")) {
+        const productRef = doc(db, "products", id);
+        await deleteDoc(productRef);
+        alert("Ürün başarıyla silindi!");
+        fetchProducts(); // Ürün silindikten sonra tabloyu yeniden yükle
+      }
+    }
+
+    window.onload = function() {
+      fetchProducts();
+      window.openEditModal = openEditModal;
+      window.updateProduct = updateProduct;
+      window.deleteProduct = deleteProduct;
+    };
+  </script>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="../../../index.html">Your Store</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+        aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-center" id="navbarContent">
+        <!-- Ortalanmış Navbar Linkleri -->
+        <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" href="urunekle.html">Ürün Ekle</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="urunduzenle.html">Ürün Düzenle</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container mt-5">
+    <h2 class="text-center mb-4">Ürün Listesi</h2>
+    <div class="table-responsive">
+      <table class="table table-bordered align-middle">
+        <thead class="table-light">
+          <tr>
+            <th scope="col">Ürün Görseli</th>
+            <th scope="col">Ürün Adı</th>
+            <th scope="col">Fiyat</th>
+            <th scope="col" class="description">Açıklama</th>
+            <th scope="col">İşlemler</th>
+          </tr>
+        </thead>
+        <tbody id="productsTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Edit Product Modal -->
+  <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editProductModalLabel">Ürünü Düzenle</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editProductForm">
+            <input type="hidden" id="productId">
+            <div class="mb-3" id="existingImages">
+              <!-- Mevcut resimler burada gösterilecek -->
+            </div>
+            <div class="mb-3">
+              <label for="newImages" class="form-label">Yeni Resim Ekle</label>
+              <input class="form-control" type="file" id="newImages" accept="image/*" multiple>
+              <small class="form-text text-muted">Birden fazla resim ekleyebilirsiniz.</small>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="productName" class="form-label">Ürün Adı</label>
+                <input type="text" class="form-control" id="productName" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="productPrice" class="form-label">Fiyat ($)</label>
+                <input type="number" step="0.01" class="form-control" id="productPrice" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="productDescription" class="form-label">Açıklama</label>
+              <textarea class="form-control" id="productDescription" rows="3"></textarea>
+            </div>
+
+            <!-- Ek Alanlar -->
+            <div class="row">
+              <div id="processorWrapper" class="col-md-6 mb-3" style="display:none;">
+                <label for="processor" class="form-label">İşlemci</label>
+                <input type="text" class="form-control" id="processor">
+              </div>
+              <div id="ramWrapper" class="col-md-6 mb-3" style="display:none;">
+                <label for="ram" class="form-label">RAM</label>
+                <input type="text" class="form-control" id="ram">
+              </div>
+              <div id="ssdWrapper" class="col-md-6 mb-3" style="display:none;">
+                <label for="ssd" class="form-label">SSD</label>
+                <input type="text" class="form-control" id="ssd">
+              </div>
+              <div id="motherboardWrapper" class="col-md-6 mb-3" style="display:none;">
+                <label for="motherboard" class="form-label">Anakart</label>
+                <input type="text" class="form-control" id="motherboard">
+              </div>
+              <div id="powerSupplyWrapper" class="col-md-6 mb-3" style="display:none;">
+                <label for="powerSupply" class="form-label">Power Supply</label>
+                <input type="text" class="form-control" id="powerSupply">
+              </div>
+              <div id="graphicsCardWrapper" class="col-md-6 mb-3" style="display:none;">
+                <label for="graphicsCard" class="form-label">Ekran Kartı</label>
+                <input type="text" class="form-control" id="graphicsCard">
+              </div>
+              <div id="gpuModelWrapper" class="col-md-6 mb-3" style="display:none;">
+                <label for="gpuModel" class="form-label">Ekran Kartı Modeli</label>
+                <input type="text" class="form-control" id="gpuModel">
+              </div>
+              <div id="monitorResolutionWrapper" class="col-md-6 mb-3" style="display:none;">
+                <label for="monitorResolution" class="form-label">Monitör Çözünürlüğü</label>
+                <input type="text" class="form-control" id="monitorResolution">
+              </div>
+              <div id="monitorInchWrapper" class="col-md-6 mb-3" style="display:none;">
+                <label for="monitorInch" class="form-label">Monitör İnç</label>
+                <input type="number" step="0.1" class="form-control" id="monitorInch">
+              </div>
+              <div id="monitorHzWrapper" class="col-md-6 mb-3" style="display:none;">
+                <label for="monitorHz" class="form-label">Monitör Hz</label>
+                <input type="number" class="form-control" id="monitorHz">
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+          <button type="button" class="btn btn-primary" onclick="updateProduct()">Güncelle</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Bağımlılıkları -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Bootstrap Icons (Opsiyonel) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+</body>
+</html>

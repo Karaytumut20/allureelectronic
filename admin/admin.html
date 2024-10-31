@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product List</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script type="module">
+        // Firebase yapılandırma ve başlatma kodu
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+
+        // Firebase yapılandırması
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYOOa5J3U6k_kVM721xF7LCoxWY6EsE7Q",
+            authDomain: "electronic-b4925.firebaseapp.com",
+            projectId: "electronic-b4925",
+            storageBucket: "electronic-b4925.appspot.com",
+            messagingSenderId: "904593171488",
+            appId: "1:904593171488:web:3a8f5967cad2bd7bbac845",
+            measurementId: "G-BSXFE5FHJV"
+        };
+
+        // Firebase'i başlat
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // Firestore'a ürün ekleme fonksiyonu
+        async function addProduct() {
+            const name = document.getElementById("productName").value;
+            const description = document.getElementById("productDescription").value;
+            const price = parseFloat(document.getElementById("productPrice").value);
+            const imageFile = document.getElementById("productImageFile").files[0];
+
+            if (!name || !description || isNaN(price) || !imageFile) {
+                alert("Lütfen tüm alanları doldurun.");
+                return;
+            }
+
+            // Resim dosyasını Firebase Storage'a yükleme
+            const storageRef = ref(storage, 'products/' + imageFile.name);
+            try {
+                await uploadBytes(storageRef, imageFile);
+                const imageUrl = await getDownloadURL(storageRef);
+
+                // En yüksek ürün ID'sini bul ve bir sonraki ID'yi hesapla
+                const productsCollection = collection(db, "products");
+                const q = query(productsCollection, orderBy("productID", "desc"), limit(1));
+                const querySnapshot = await getDocs(q);
+
+                let newProductID = 1; // Eğer ürün yoksa ID 1 olur
+                if (!querySnapshot.empty) {
+                    const lastProduct = querySnapshot.docs[0].data();
+                    newProductID = lastProduct.productID + 1; // Son ürünün ID'sini 1 artır
+                }
+
+                // Firestore'a ürünü kaydetme
+                const docRef = await addDoc(collection(db, "products"), {
+                    productID: newProductID,
+                    name: name,
+                    description: description,
+                    price: price,
+                    image_url: imageUrl
+                });
+                console.log("Ürün başarıyla eklendi: ", docRef.id);
+                alert("Ürün Firestore'a başarıyla eklendi!");
+
+                // Formu temizle
+                document.getElementById("productForm").reset();
+                fetchProducts(); // Ürün ekledikten sonra listeyi güncelle
+            } catch (e) {
+                console.error("Ürün eklenirken hata oluştu: ", e);
+            }
+        }
+
+        // Firestore'dan ürünleri çekme fonksiyonu
+        async function fetchProducts() {
+            const querySnapshot = await getDocs(collection(db, "products"));
+            const container = document.getElementById('product-container');
+            container.innerHTML = ''; // Önceki ürünleri temizle
+            querySnapshot.forEach((doc) => {
+                const product = doc.data();
+                const productImage = product.image_url ? product.image_url : 'placeholder.jpg';
+                const productCard = `
+                    <div class="col mb-5">
+                        <a href="detail.html?product=${doc.id}" style="text-decoration: none; color: inherit;">
+                            <div class="card h-100">
+                                <img class="card-img-top" src="${productImage}" alt="${product.name}" />
+                                <div class="card-body p-4">
+                                    <div class="text-center">
+                                        <h5 class="fw-bolder">${product.name}</h5>
+                                        <p>$${product.price}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                `;
+                container.innerHTML += productCard;
+            });
+        }
+
+        // Sayfa yüklendiğinde ürünleri çek
+        window.onload = fetchProducts;
+
+        // Ürün ekleme butonuna tıklandığında
+        document.getElementById('addProductButton').addEventListener('click', addProduct);
+    </script>
+</head>
+
+<body>
+    <!-- Navigation-->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container px-4 px-lg-5">
+            <a class="navbar-brand" href="../index.html">Your Store</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="../index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#products">Products</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contact">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Ürün ekleme formu -->
+    <div class="container mt-5">
+        <h1 class="mb-4">Yeni Ürün Ekle</h1>
+        <form id="productForm">
+            <div class="mb-3">
+                <label for="productName" class="form-label">Ürün Adı</label>
+                <input type="text" class="form-control" id="productName" placeholder="Ürün adı">
+            </div>
+            <div class="mb-3">
+                <label for="productDescription" class="form-label">Ürün Açıklaması</label>
+                <input type="text" class="form-control" id="productDescription" placeholder="Ürün açıklaması">
+            </div>
+            <div class="mb-3">
+                <label for="productPrice" class="form-label">Fiyat</label>
+                <input type="number" class="form-control" id="productPrice" placeholder="Fiyat">
+            </div>
+            <div class="mb-3">
+                <label for="productImageFile" class="form-label">Resim Yükle</label>
+                <input type="file" class="form-control" id="productImageFile">
+            </div>
+            <button type="button" id="addProductButton" class="btn btn-primary">Ürün Ekle</button>
+        </form>
+    </div>
+
+    <!-- Ürün Listeleme Alanı -->
+    <div class="container mt-5">
+        <h1 class="mb-4">Product List</h1>
+        <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center" id="product-container">
+            <!-- Ürün kartları buraya yüklenecek -->
+        </div>
+    </div>
+
+    <!-- Bootstrap JS ve Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>

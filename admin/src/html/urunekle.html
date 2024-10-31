@@ -1,0 +1,1746 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ürün Ekle</title>
+  <link rel="shortcut icon" type="image/png" href="../assets/images/logos/favicon.png" />
+  <link rel="stylesheet" href="../assets/css/styles.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+  
+  <!-- Firebase Configuration and Scripts -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+
+    // Firebase yapılandırma ayarları
+    const firebaseConfig = {
+      apiKey: "AIzaSyCYOOa5J3U6k_kVM721xF7LCoxWY6EsE7Q",
+      authDomain: "electronic-b4925.firebaseapp.com",
+      projectId: "electronic-b4925",
+      storageBucket: "electronic-b4925.appspot.com",
+      messagingSenderId: "904593171488",
+      appId: "1:904593171488:web:3a8f5967cad2bd7bbac845",
+      measurementId: "G-BSXFE5FHJV"
+    };
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Kategori seçildiğinde ek alanları göster
+      document.getElementById('productCategory').addEventListener('change', function() {
+        const selectedCategory = this.value;
+        const additionalFields = document.getElementById('additionalFields');
+        const peripheralFields = document.getElementById('peripheralFields');
+        const ciscoFields = document.getElementById('ciscoFields'); // Cisco Networks
+        const arubaFields = document.getElementById('arubaFields'); // Aruba Networks
+        const ciscoSystemsFields = document.getElementById('ciscoSystemsFields'); // Cisco Systems
+        const serverFields = document.getElementById('serverFields'); // Sunucu
+        const serverPeripheralFields = document.getElementById('serverPeripheralFields'); // Sunucu Çevre Birimleri
+
+        // Tüm alanları gizle
+        additionalFields.style.display = 'none';
+        peripheralFields.style.display = 'none';
+        ciscoFields.style.display = 'none';
+        arubaFields.style.display = 'none';
+        ciscoSystemsFields.style.display = 'none';
+        serverFields.style.display = 'none';
+        serverPeripheralFields.style.display = 'none';
+
+        // Bilgisayar kategorileri için additionalFields'ı göster
+        if (["Bilgisayar", "Oyun Bilgisayarı", "All in One Bilgisayar", "Bilgisayar Bileşenleri", "Mini pc", "Laptop", "Kurumsal laptop", "Gaming laptop"].includes(selectedCategory)) {
+          additionalFields.style.display = 'block';
+        } 
+        else if (selectedCategory === "Çevre Birimleri") {
+          peripheralFields.style.display = 'block';
+        } 
+        else if (selectedCategory === "Cisco networks") {
+          ciscoFields.style.display = 'block';
+        } 
+        else if (selectedCategory === "Aruba networks") {
+          arubaFields.style.display = 'block';
+        }
+        else if (selectedCategory === "Cisco Systems") {
+          ciscoSystemsFields.style.display = 'block';
+        }
+        else if (selectedCategory === "Sunucu") { // Yeni Sunucu Kategorisi
+          serverFields.style.display = 'block';
+        }
+        else if (selectedCategory === "Sunucu Çevre Birimleri") { // Yeni Sunucu Çevre Birimleri Kategorisi
+          serverPeripheralFields.style.display = 'block';
+        }
+        // Diğer kategoriler için özel bir işlem yapmıyoruz
+      });
+
+      // Çevre birimi seçildiğinde ek alanları göster
+      document.getElementById('peripheralSelect').addEventListener('change', function() {
+        const selectedPeripheral = this.value;
+        const peripheralFieldsGPU = document.getElementById('peripheralFieldsGPU');
+        const peripheralFieldsMonitor = document.getElementById('peripheralFieldsMonitor');
+        const peripheralFieldsProcessor = document.getElementById('peripheralFieldsProcessor');
+        const peripheralFieldsStorage = document.getElementById('peripheralFieldsStorage');
+        const peripheralFieldsMotherboard = document.getElementById('peripheralFieldsMotherboard');
+        const peripheralFieldsRAM = document.getElementById('peripheralFieldsRAM');
+        const peripheralFieldsComputerCase = document.getElementById('peripheralFieldsComputerCase'); // Yeni Bilgisayar Kasa Alanı
+
+        // Tüm periferik alanları gizle
+        peripheralFieldsGPU.style.display = 'none';
+        peripheralFieldsMonitor.style.display = 'none';
+        peripheralFieldsProcessor.style.display = 'none';
+        peripheralFieldsStorage.style.display = 'none';
+        peripheralFieldsMotherboard.style.display = 'none';
+        peripheralFieldsRAM.style.display = 'none';
+        peripheralFieldsComputerCase.style.display = 'none'; // Bilgisayar Kasa Alanını Gizle
+
+        // Seçilen periferik alanını göster
+        if (selectedPeripheral === "RAM") {
+          peripheralFieldsRAM.style.display = 'block';
+        }
+        else if (selectedPeripheral === "Ekran Kartı") {
+          peripheralFieldsGPU.style.display = 'block';
+        } 
+        else if (selectedPeripheral === "Monitör") {
+          peripheralFieldsMonitor.style.display = 'block';
+        } 
+        else if (selectedPeripheral === "İşlemci") {
+          peripheralFieldsProcessor.style.display = 'block';
+        }
+        else if (selectedPeripheral === "Depolama") {
+          peripheralFieldsStorage.style.display = 'block';
+        }
+        else if (selectedPeripheral === "Anakart") {
+          peripheralFieldsMotherboard.style.display = 'block';
+        }
+        else if (selectedPeripheral === "Bilgisayar Kasa") { // Bilgisayar Kasa Seçildiğinde
+          peripheralFieldsComputerCase.style.display = 'block';
+        }
+      });
+
+      // Bilgisayar Kasa içindeki Power Supply Checkbox'ına event listener ekleyin
+      document.getElementById('casePowerSupply').addEventListener('change', function() {
+        const powerWattField = document.getElementById('powerWattField');
+        if (this.checked) {
+          powerWattField.style.display = 'block';
+        } else {
+          powerWattField.style.display = 'none';
+          document.getElementById('powerWattInput').value = "";
+        }
+      });
+
+      // Anakart markası seçildiğinde soket seçeneklerini göster
+      document.getElementById('motherboardBrandSelect').addEventListener('change', function() {
+        const selectedMotherboardBrand = this.value;
+        const amdSocketOptions = document.getElementById('amdSocketOptions');
+        const intelSocketOptions = document.getElementById('intelSocketOptions');
+        
+        amdSocketOptions.style.display = 'none';
+        intelSocketOptions.style.display = 'none';
+
+        if (selectedMotherboardBrand === "AMD") {
+          amdSocketOptions.style.display = 'block';
+        } else if (selectedMotherboardBrand === "Intel") {
+          intelSocketOptions.style.display = 'block';
+        }
+      });
+
+      // İşlemci markası seçildiğinde soket tiplerini göster ve işlemci model alanını göster
+      document.getElementById('processorBrandSelect').addEventListener('change', function() {
+        const selectedProcessorBrand = this.value;
+        const amdProcessorSocketOptions = document.getElementById('amdProcessorSocketOptions');
+        const intelProcessorSocketOptions = document.getElementById('intelProcessorSocketOptions');
+        const processorModelField = document.getElementById('processorModelField');
+        
+        amdProcessorSocketOptions.style.display = 'none';
+        intelProcessorSocketOptions.style.display = 'none';
+        processorModelField.style.display = 'none';
+
+        if (selectedProcessorBrand === "AMD") {
+          amdProcessorSocketOptions.style.display = 'block';
+          processorModelField.style.display = 'block';
+        } else if (selectedProcessorBrand === "Intel") {
+          intelProcessorSocketOptions.style.display = 'block';
+          processorModelField.style.display = 'block';
+        }
+      });
+
+      // Monitör markası seçildiğinde model alanını göster
+      document.getElementById('monitorBrandSelect').addEventListener('change', function() {
+        const selectedMonitorBrand = this.value;
+        const monitorModelField = document.getElementById('monitorModelField');
+
+        if (selectedMonitorBrand) {
+          monitorModelField.style.display = 'block';
+        } else {
+          monitorModelField.style.display = 'none';
+        }
+      });
+
+      // Depolama türü seçildiğinde depolama boyutu alanını göster
+      document.getElementById('storageTypeSelect').addEventListener('change', function() {
+        const storageSizeField = document.getElementById('storageSizeField');
+        if (this.value) {
+          storageSizeField.style.display = 'block';
+        } else {
+          storageSizeField.style.display = 'none';
+        }
+      });
+
+      // Cisco Networks alt kategori seçildiğinde ek alanları göster
+      document.getElementById('ciscoSubCategory').addEventListener('change', function() {
+        const selectedSubCategory = this.value;
+        const ciscoSwitchesFields = document.getElementById('ciscoSwitchesFields');
+        const ciscoRoutersFields = document.getElementById('ciscoRoutersFields');
+        const ciscoAccessPointsFields = document.getElementById('ciscoAccessPointsFields');
+
+        // Tüm alt kategori alanlarını gizle
+        ciscoSwitchesFields.style.display = 'none';
+        ciscoRoutersFields.style.display = 'none';
+        ciscoAccessPointsFields.style.display = 'none';
+
+        // Seçilen alt kategoriye göre alanları göster
+        if (selectedSubCategory === "Switches") {
+          ciscoSwitchesFields.style.display = 'block';
+        } else if (selectedSubCategory === "Routers") {
+          ciscoRoutersFields.style.display = 'block';
+        } else if (selectedSubCategory === "Access Points") {
+          ciscoAccessPointsFields.style.display = 'block';
+        }
+      });
+
+      // Aruba Networks alt kategori seçildiğinde ek alanları göster
+      document.getElementById('arubaSubCategory').addEventListener('change', function() {
+        const selectedSubCategory = this.value;
+        const arubaSwitchesFields = document.getElementById('arubaSwitchesFields');
+        const arubaWirelessAPFields = document.getElementById('arubaWirelessAPFields');
+        const arubaNetworkMgmtFields = document.getElementById('arubaNetworkMgmtFields');
+
+        // Tüm alt kategori alanlarını gizle
+        arubaSwitchesFields.style.display = 'none';
+        arubaWirelessAPFields.style.display = 'none';
+        arubaNetworkMgmtFields.style.display = 'none';
+
+        // Seçilen alt kategoriye göre alanları göster
+        if (selectedSubCategory === "Switches") {
+          arubaSwitchesFields.style.display = 'block';
+        } else if (selectedSubCategory === "Wireless Access Points") {
+          arubaWirelessAPFields.style.display = 'block';
+        } else if (selectedSubCategory === "Network Management") {
+          arubaNetworkMgmtFields.style.display = 'block';
+        }
+      });
+
+      // Cisco Systems alt kategori seçildiğinde ek alanları göster
+      document.getElementById('ciscoSystemsSubCategory').addEventListener('change', function() {
+        const selectedSubCategory = this.value;
+        const ciscoSystemsSecurityFields = document.getElementById('ciscoSystemsSecurityFields');
+        const ciscoSystemsCollaborationFields = document.getElementById('ciscoSystemsCollaborationFields');
+        const ciscoSystemsSDWANFields = document.getElementById('ciscoSystemsSDWANFields');
+        const ciscoSystemsMerakiMXFields = document.getElementById('ciscoSystemsMerakiMXFields');
+
+        // Tüm alt kategori alanlarını gizle
+        ciscoSystemsSecurityFields.style.display = 'none';
+        ciscoSystemsCollaborationFields.style.display = 'none';
+        ciscoSystemsSDWANFields.style.display = 'none';
+        ciscoSystemsMerakiMXFields.style.display = 'none';
+
+        // Seçilen alt kategoriye göre alanları göster
+        if (selectedSubCategory === "Security") {
+          ciscoSystemsSecurityFields.style.display = 'block';
+        } else if (selectedSubCategory === "Collaboration") {
+          ciscoSystemsCollaborationFields.style.display = 'block';
+        } else if (selectedSubCategory === "SD-WAN & Software-Defined Networking") {
+          ciscoSystemsSDWANFields.style.display = 'block';
+        } else if (selectedSubCategory === "Meraki MX") {
+          ciscoSystemsMerakiMXFields.style.display = 'block';
+        }
+      });
+
+      // Sunucu Alt Kategorisi seçildiğinde ek alanları göster
+      document.getElementById('serverSubCategory').addEventListener('change', function() {
+        const selectedSubCategory = this.value;
+        const serverTowerFields = document.getElementById('serverTowerFields');
+        const serverRackFields = document.getElementById('serverRackFields');
+        const serverBladeFields = document.getElementById('serverBladeFields');
+
+        // Tüm sunucu alt kategori alanlarını gizle
+        serverTowerFields.style.display = 'none';
+        serverRackFields.style.display = 'none';
+        serverBladeFields.style.display = 'none';
+
+        // Seçilen alt kategoriye göre alanları göster
+        if (selectedSubCategory === "Tower Server") {
+          serverTowerFields.style.display = 'block';
+        } else if (selectedSubCategory === "Rack Server") {
+          serverRackFields.style.display = 'block';
+        } else if (selectedSubCategory === "Blade Server") {
+          serverBladeFields.style.display = 'block';
+        }
+      });
+
+      // Sunucu çevre birimi seçildiğinde ek alanları göster
+      document.getElementById('serverPeripheralSelect').addEventListener('change', function() {
+        const selectedPeripheral = this.value;
+        const serverPeripheralFieldsCPU = document.getElementById('serverPeripheralFieldsCPU');
+        const serverPeripheralFieldsRAM = document.getElementById('serverPeripheralFieldsRAM');
+        const serverPeripheralFieldsStorage = document.getElementById('serverPeripheralFieldsStorage');
+        const serverPeripheralFieldsMotherboard = document.getElementById('serverPeripheralFieldsMotherboard');
+        const serverPeripheralFieldsHDD = document.getElementById('serverPeripheralFieldsHDD');
+        const serverPeripheralFieldsRAID = document.getElementById('serverPeripheralFieldsRAID');
+        const serverPeripheralFieldsNetwork = document.getElementById('serverPeripheralFieldsNetwork');
+
+        // Tüm sunucu çevre birimi alanlarını gizle
+        serverPeripheralFieldsCPU.style.display = 'none';
+        serverPeripheralFieldsRAM.style.display = 'none';
+        serverPeripheralFieldsStorage.style.display = 'none';
+        serverPeripheralFieldsMotherboard.style.display = 'none';
+        serverPeripheralFieldsHDD.style.display = 'none';
+        serverPeripheralFieldsRAID.style.display = 'none';
+        serverPeripheralFieldsNetwork.style.display = 'none';
+
+        // Seçilen sunucu çevre birimi alanını göster
+        if (selectedPeripheral === "Sunucu İşlemcisi") {
+          serverPeripheralFieldsCPU.style.display = 'block';
+        }
+        else if (selectedPeripheral === "Sunucu RAM") {
+          serverPeripheralFieldsRAM.style.display = 'block';
+        }
+        else if (selectedPeripheral === "Sunucu Depolama") {
+          serverPeripheralFieldsStorage.style.display = 'block';
+        }
+        else if (selectedPeripheral === "Sunucu Anakart") {
+          serverPeripheralFieldsMotherboard.style.display = 'block';
+        }
+        else if (selectedPeripheral === "HDD") {
+          serverPeripheralFieldsHDD.style.display = 'block';
+        }
+        else if (selectedPeripheral === "RAID Controller") {
+          serverPeripheralFieldsRAID.style.display = 'block';
+        }
+        else if (selectedPeripheral === "Network Card") {
+          serverPeripheralFieldsNetwork.style.display = 'block';
+        }
+      });
+
+      // Anakart markası seçildiğinde soket seçeneklerini göster (Sunucu Çevre Birimleri için)
+      document.getElementById('serverPeripheralMotherboardBrand').addEventListener('change', function() {
+        const selectedMotherboardBrand = this.value;
+        const amdSocketOptions = document.getElementById('serverPeripheralAMDSocketOptions');
+        const intelSocketOptions = document.getElementById('serverPeripheralIntelSocketOptions');
+        
+        amdSocketOptions.style.display = 'none';
+        intelSocketOptions.style.display = 'none';
+
+        if (selectedMotherboardBrand === "AMD") {
+          amdSocketOptions.style.display = 'block';
+        } else if (selectedMotherboardBrand === "Intel") {
+          intelSocketOptions.style.display = 'block';
+        }
+      });
+    });
+
+    // Ürün ekleme fonksiyonu
+    async function addProduct() {
+      // Temel Ürün Bilgileri
+      const name = document.getElementById("productName").value.trim();
+      const description = document.getElementById("productDescription").value.trim();
+      const priceValue = document.getElementById("productPrice").value;
+      const price = priceValue ? parseFloat(priceValue) : null;
+      const category = document.getElementById("productCategory").value;
+      const imageFiles = document.getElementById("productImageFile").files;
+
+      // "İkinci El" Checkbox Değeri
+      const isSecondHand = document.getElementById("isSecondHand").checked;
+
+      // "Fırsat Ürünleri" Checkbox Değeri
+      const isFirsatUrunleri = document.getElementById("isFirsatUrunleri").checked;
+
+      // Ek alanlar
+      const processor = document.getElementById("processor").value.trim();
+      const ram = document.getElementById("ram").value.trim();
+      const ssd = document.getElementById("ssd").value.trim();
+      const motherboard = document.getElementById("motherboard").value.trim();
+      const powerSupply = document.getElementById("powerSupply").value.trim();
+      const graphicsCard = document.getElementById("graphicsCard").value.trim();
+
+      const peripheralSelected = document.getElementById("peripheralSelect").value;
+
+      // RAM alanları
+      const ramGBValue = document.getElementById("ramGB").value;
+      const ramGB = ramGBValue ? parseInt(ramGBValue) : null;
+      const ramMHzValue = document.getElementById("ramMHz").value;
+      const ramMHz = ramMHzValue ? parseInt(ramMHzValue) : null;
+      const ramDDR = document.getElementById("ramDDRSelect").value;
+
+      // RAM Tipi - Yeni Eklendi
+      const ramType = document.getElementById("ramTypeSelect").value;
+
+      // RAM Markası - Yeni Eklendi
+      const ramBrand = document.getElementById("ramBrandInput").value.trim();
+
+      // Ekran Kartı
+      const gpuBrand = document.getElementById("gpuBrandInput").value.trim();
+
+      const gpuModel = document.getElementById("gpuModel").value.trim();
+      const gpuVramValue = document.getElementById("gpuVram").value;
+      const gpuVram = gpuVramValue ? parseInt(gpuVramValue) : null;
+
+      // Yeni Ekran Kartı Görüntü Çıkışları
+      const gpuOutputs = [];
+      const gpuHDMI = document.getElementById("gpuHDMI").checked ? { type: 'HDMI', count: parseInt(document.getElementById("gpuHDMICount").value) || 1 } : null;
+      const gpuVGA = document.getElementById("gpuVGA").checked ? { type: 'VGA', count: parseInt(document.getElementById("gpuVGACount").value) || 1 } : null;
+      const gpuDisplayPort = document.getElementById("gpuDisplayPort").checked ? { type: 'DisplayPort', count: parseInt(document.getElementById("gpuDisplayPortCount").value) || 1 } : null;
+      const gpuDVI = document.getElementById("gpuDVI").checked ? { type: 'DVI', count: parseInt(document.getElementById("gpuDVICount").value) || 1 } : null;
+      const gpuOther = document.getElementById("gpuOther").checked ? { type: 'Other', description: document.getElementById("gpuOtherInput").value.trim(), count: parseInt(document.getElementById("gpuOtherCount").value) || 1 } : null;
+
+      if (gpuHDMI) gpuOutputs.push(gpuHDMI);
+      if (gpuVGA) gpuOutputs.push(gpuVGA);
+      if (gpuDisplayPort) gpuOutputs.push(gpuDisplayPort);
+      if (gpuDVI) gpuOutputs.push(gpuDVI);
+      if (gpuOther && gpuOther.description) gpuOutputs.push(gpuOther);
+
+      // Bit Girişi
+      const gpuBitInput = document.getElementById("gpuBitInput").value.trim();
+
+      // Monitör
+      const monitorBrand = document.getElementById("monitorBrandSelect").value;
+      const monitorModel = document.getElementById("monitorModel").value.trim();
+      const monitorResolution = document.getElementById("monitorResolution").value.trim();
+      const monitorInchValue = document.getElementById("monitorInch").value;
+      const monitorInch = monitorInchValue ? parseFloat(monitorInchValue) : null;
+      const monitorHzValue = document.getElementById("monitorHz").value;
+      const monitorHz = monitorHzValue ? parseInt(monitorHzValue) : null;
+
+      // Yeni Monitör Giriş/Çıkışları
+      const monitorOutputs = [];
+      const monitorHDMI = document.getElementById("monitorHDMI").checked ? { type: 'HDMI', count: parseInt(document.getElementById("monitorHDMICount").value) || 1 } : null;
+      const monitorVGA = document.getElementById("monitorVGA").checked ? { type: 'VGA', count: parseInt(document.getElementById("monitorVGACount").value) || 1 } : null;
+      const monitorDisplayPort = document.getElementById("monitorDisplayPort").checked ? { type: 'DisplayPort', count: parseInt(document.getElementById("monitorDisplayPortCount").value) || 1 } : null;
+      const monitorDVI = document.getElementById("monitorDVI").checked ? { type: 'DVI', count: parseInt(document.getElementById("monitorDVICount").value) || 1 } : null;
+      const monitorOther = document.getElementById("monitorOther").checked ? { type: 'Other', description: document.getElementById("monitorOtherInput").value.trim(), count: parseInt(document.getElementById("monitorOtherCount").value) || 1 } : null;
+
+      if (monitorHDMI) monitorOutputs.push(monitorHDMI);
+      if (monitorVGA) monitorOutputs.push(monitorVGA);
+      if (monitorDisplayPort) monitorOutputs.push(monitorDisplayPort);
+      if (monitorDVI) monitorOutputs.push(monitorDVI);
+      if (monitorOther && monitorOther.description) monitorOutputs.push(monitorOther);
+
+      // İşlemci
+      const processorBrand = document.getElementById("processorBrandSelect").value;
+      const processorModel = document.getElementById("processorModel").value.trim();
+
+      // Yeni İşlemci Alanları: Çekirdek Sayısı, GHz Hızı ve Önbellek
+      const processorCoresValue = document.getElementById("processorCores").value;
+      const processorCores = processorCoresValue ? parseInt(processorCoresValue) : null;
+      const processorGHzValue = document.getElementById("processorGHz").value;
+      const processorGHz = processorGHzValue ? parseFloat(processorGHzValue) : null;
+      const processorTurboGHzValue = document.getElementById("processorTurboGHz").value;
+      const processorTurboGHz = processorTurboGHzValue ? parseFloat(processorTurboGHzValue) : null;
+      const processorTDPValue = document.getElementById("processorTDP").value;
+      const processorTDP = processorTDPValue ? parseInt(processorTDPValue) : null;
+      const processorCacheValue = document.getElementById("processorCache").value.trim();
+      const processorCache = processorCacheValue ? processorCacheValue : null;
+
+      let processorSocketType;
+      if (processorBrand === "AMD") {
+        processorSocketType = document.getElementById("amdProcessorSocketSelect").value;
+      } else if (processorBrand === "Intel") {
+        processorSocketType = document.getElementById("intelProcessorSocketSelect").value;
+      }
+
+      // Depolama
+      const storageType = document.getElementById("storageTypeSelect").value;
+      const storageSizeValue = document.getElementById("storageSize").value;
+      const storageSize = storageSizeValue ? parseInt(storageSizeValue) : null;
+
+      // Depolama Markası - Yeni Eklendi
+      const storageBrand = document.getElementById("storageBrandInput").value.trim();
+
+      // Depolama Okuma/Yazma Hızı - Yeni Eklendi
+      const storageReadSpeedValue = document.getElementById("storageReadSpeed").value;
+      const storageReadSpeed = storageReadSpeedValue ? parseInt(storageReadSpeedValue) : null;
+      const storageWriteSpeedValue = document.getElementById("storageWriteSpeed").value;
+      const storageWriteSpeed = storageWriteSpeedValue ? parseInt(storageWriteSpeedValue) : null;
+
+      // Anakart alanları
+      const motherboardBrand = document.getElementById('motherboardBrandSelect').value;
+      let socketType;
+      if (motherboardBrand === "AMD") {
+        socketType = document.getElementById('amdSocketTypeSelect').value;
+      } else if (motherboardBrand === "Intel") {
+        socketType = document.getElementById('intelSocketTypeSelect').value;
+      }
+      const motherboardModel = document.getElementById('motherboardModel').value.trim();
+      const m2Support = document.getElementById('m2Support').checked;
+
+      // Yeni Eklenen Alanlar
+      const ramSlotsValue = document.getElementById('ramSlots').value;
+      const ramSlots = ramSlotsValue ? parseInt(ramSlotsValue) : null;
+      const maxRamValue = document.getElementById('maxRam').value;
+      const maxRam = maxRamValue ? parseInt(maxRamValue) : null;
+      const maxRamMHzValue = document.getElementById('maxRamMHz').value;
+      const maxRamMHz = maxRamMHzValue ? parseInt(maxRamMHzValue) : null;
+
+      // Cisco Networks Alt Kategori Alanları
+      const ciscoSubCategory = document.getElementById("ciscoSubCategory") ? document.getElementById("ciscoSubCategory").value : null;
+      const ciscoModel = document.getElementById("ciscoModel") ? document.getElementById("ciscoModel").value.trim() : null;
+
+      // Aruba Networks Alt Kategori Alanları
+      const arubaSubCategory = document.getElementById("arubaSubCategory") ? document.getElementById("arubaSubCategory").value : null;
+      const arubaModel = document.getElementById("arubaModel") ? document.getElementById("arubaModel").value.trim() : null;
+
+      // Cisco Systems Alt Kategori Alanları
+      const ciscoSystemsSubCategory = document.getElementById("ciscoSystemsSubCategory") ? document.getElementById("ciscoSystemsSubCategory").value : null;
+      const ciscoSystemsModel = document.getElementById("ciscoSystemsModel") ? document.getElementById("ciscoSystemsModel").value.trim() : null;
+
+      // Sunucu Alt Kategorisi Alanları
+      const serverSubCategory = document.getElementById("serverSubCategory") ? document.getElementById("serverSubCategory").value : null;
+      const serverModel = document.getElementById("serverModel") ? document.getElementById("serverModel").value.trim() : null;
+
+      // Sunucu Çevre Birimleri Alanları
+      const serverPeripheralSelected = document.getElementById("serverPeripheralSelect").value;
+      
+      // Sunucu Çevre Birimleri için detaylı alanları toplamak
+      let serverPeripherals = {};
+      if (serverPeripheralSelected === "Sunucu İşlemcisi") {
+        const serverPeripheralProcessorModel = document.getElementById("serverPeripheralProcessorModel").value.trim();
+        const serverPeripheralProcessorCores = document.getElementById("serverPeripheralProcessorCores").value;
+        const serverPeripheralProcessorGHz = document.getElementById("serverPeripheralProcessorGHz").value;
+        const serverPeripheralProcessorTurboGHz = document.getElementById("serverPeripheralProcessorTurboGHz").value;
+        const serverPeripheralProcessorTDP = document.getElementById("serverPeripheralProcessorTDP").value;
+        serverPeripherals.processor = {
+          model: serverPeripheralProcessorModel || null,
+          cores: serverPeripheralProcessorCores ? parseInt(serverPeripheralProcessorCores) : null,
+          ghz: serverPeripheralProcessorGHz ? parseFloat(serverPeripheralProcessorGHz) : null,
+          turboGhZ: serverPeripheralProcessorTurboGHz ? parseFloat(serverPeripheralProcessorTurboGHz) : null,
+          tdp: serverPeripheralProcessorTDP ? parseInt(serverPeripheralProcessorTDP) : null
+        };
+      }
+      else if (serverPeripheralSelected === "Sunucu RAM") {
+        const serverPeripheralRAMCapacity = document.getElementById("serverPeripheralRAMCapacity").value;
+        const serverPeripheralRAMMHz = document.getElementById("serverPeripheralRAMMHz").value;
+        const serverPeripheralRAMType = document.getElementById("serverPeripheralRAMType").value;
+        const serverPeripheralRAMBrand = document.getElementById("serverPeripheralRAMBrand").value.trim();
+        const serverPeripheralRAMECC = document.getElementById("serverPeripheralRAMECC").checked;
+        serverPeripherals.ram = {
+          capacityGB: serverPeripheralRAMCapacity ? parseInt(serverPeripheralRAMCapacity) : null,
+          mhz: serverPeripheralRAMMHz ? parseInt(serverPeripheralRAMMHz) : null,
+          type: serverPeripheralRAMType || null,
+          brand: serverPeripheralRAMBrand || null,
+          ecc: serverPeripheralRAMECC
+        };
+      }
+      else if (serverPeripheralSelected === "Sunucu Depolama") {
+        const serverPeripheralStorageType = document.getElementById("serverPeripheralStorageType").value;
+        const serverPeripheralStorageCapacity = document.getElementById("serverPeripheralStorageCapacity").value;
+        const serverPeripheralStorageBrand = document.getElementById("serverPeripheralStorageBrand").value.trim();
+        const serverPeripheralStorageReadSpeed = document.getElementById("serverPeripheralStorageReadSpeed").value;
+        const serverPeripheralStorageWriteSpeed = document.getElementById("serverPeripheralStorageWriteSpeed").value;
+        serverPeripherals.storage = {
+          type: serverPeripheralStorageType || null,
+          capacityGB: serverPeripheralStorageCapacity ? parseInt(serverPeripheralStorageCapacity) : null,
+          brand: serverPeripheralStorageBrand || null,
+          readSpeed: serverPeripheralStorageReadSpeed ? parseInt(serverPeripheralStorageReadSpeed) : null,
+          writeSpeed: serverPeripheralStorageWriteSpeed ? parseInt(serverPeripheralStorageWriteSpeed) : null
+        };
+      }
+      else if (serverPeripheralSelected === "Sunucu Anakart") {
+        const serverPeripheralMotherboardBrand = document.getElementById("serverPeripheralMotherboardBrand").value;
+        const serverPeripheralMotherboardSocket = document.getElementById("serverPeripheralMotherboardSocket").value;
+        const serverPeripheralMotherboardModel = document.getElementById("serverPeripheralMotherboardModel").value.trim();
+        const serverPeripheralMotherboardM2 = document.getElementById("serverPeripheralMotherboardM2").value;
+        const serverPeripheralMotherboardRAID = document.getElementById("serverPeripheralMotherboardRAID").checked;
+        serverPeripherals.motherboard = {
+          brand: serverPeripheralMotherboardBrand || null,
+          socketType: serverPeripheralMotherboardSocket || null,
+          model: serverPeripheralMotherboardModel || null,
+          m2Support: serverPeripheralMotherboardM2 === "Var" ? true : false,
+          raidSupport: serverPeripheralMotherboardRAID
+        };
+      }
+      else if (serverPeripheralSelected === "HDD") {
+        const serverPeripheralHDD = document.getElementById("serverPeripheralHDD").value.trim();
+        const serverPeripheralHDDCapacity = document.getElementById("serverPeripheralHDDCapacity").value;
+        const serverPeripheralHDDSpeed = document.getElementById("serverPeripheralHDDSpeed").value;
+        const serverPeripheralHDDCache = document.getElementById("serverPeripheralHDDCache").value;
+        serverPeripherals.hdd = {
+          model: serverPeripheralHDD || null,
+          capacityGB: serverPeripheralHDDCapacity ? parseInt(serverPeripheralHDDCapacity) : null,
+          speedRPM: serverPeripheralHDDSpeed ? parseInt(serverPeripheralHDDSpeed) : null,
+          cacheMB: serverPeripheralHDDCache ? parseInt(serverPeripheralHDDCache) : null
+        };
+      }
+      else if (serverPeripheralSelected === "RAID Controller") {
+        const serverPeripheralRAIDController = document.getElementById("serverPeripheralRAIDController").value.trim();
+        const serverPeripheralRAIDLevels = document.getElementById("serverPeripheralRAIDLevels").value;
+        serverPeripherals.raidController = {
+          model: serverPeripheralRAIDController || null,
+          supportedRAIDLevels: serverPeripheralRAIDLevels || null
+        };
+      }
+      else if (serverPeripheralSelected === "Network Card") {
+        const serverPeripheralNetworkCard = document.getElementById("serverPeripheralNetworkCard").value.trim();
+        const serverPeripheralNetworkSpeed = document.getElementById("serverPeripheralNetworkSpeed").value;
+        const serverPeripheralNetworkPorts = document.getElementById("serverPeripheralNetworkPorts").value;
+        const serverPeripheralNetworkTechnologies = document.getElementById("serverPeripheralNetworkTechnologies").value;
+        serverPeripherals.networkCard = {
+          model: serverPeripheralNetworkCard || null,
+          speedGbps: serverPeripheralNetworkSpeed ? parseFloat(serverPeripheralNetworkSpeed) : null,
+          portCount: serverPeripheralNetworkPorts ? parseInt(serverPeripheralNetworkPorts) : null,
+          technologies: serverPeripheralNetworkTechnologies || null
+        };
+      }
+
+      // Bilgisayar Kasa Alanları
+      const caseTypeElements = document.getElementsByName('caseType');
+      let caseType = null;
+      caseTypeElements.forEach((elem) => {
+        if (elem.checked) {
+          caseType = elem.value;
+        }
+      });
+      const casePowerSupply = document.getElementById('casePowerSupply').checked;
+      const powerWatt = casePowerSupply ? parseInt(document.getElementById('powerWattInput').value) : null;
+      const caseStyle = document.getElementById('caseStyleSelect').value;
+      const caseBrand = document.getElementById('caseBrandInput').value.trim();
+
+      // Form doğrulama (Zorunlu alanları kaldırdık)
+      // Eğer bazı alanları hala zorunlu yapmak isterseniz, buraya ekleyebilirsiniz.
+
+      try {
+        const imageUrls = [];
+        if (imageFiles.length > 0) {
+          for (let i = 0; i < imageFiles.length; i++) {
+            const imageFile = imageFiles[i];
+            const storageRef = ref(storage, 'products/' + Date.now() + '_' + imageFile.name);
+            const snapshot = await uploadBytes(storageRef, imageFile);
+            const imageUrl = await getDownloadURL(snapshot.ref);
+            imageUrls.push(imageUrl);
+          }
+        }
+
+        const productsCollection = collection(db, "products");
+        const q = query(productsCollection, orderBy("productID", "desc"), limit(1));
+        const querySnapshot = await getDocs(q);
+
+        let newProductID = 1;
+        if (!querySnapshot.empty) {
+          const lastProduct = querySnapshot.docs[0].data();
+          newProductID = lastProduct.productID + 1;
+        }
+
+        const productData = {
+          productID: newProductID,
+          name: name || null,
+          description: description || null,
+          price: price !== null ? price : null,
+          category: category || null,
+          isSecondHand: isSecondHand, // "İkinci El" checkbox değeri
+          firsatUrunleri: isFirsatUrunleri, // "Fırsat Ürünleri" checkbox değeri
+          image_urls: imageUrls.length > 0 ? imageUrls : []
+        };
+
+        // Bilgisayar kategorileri için ek alanlar
+        if (["Bilgisayar", "Oyun Bilgisayarı", "All in One Bilgisayar", "Bilgisayar Bileşenleri", "Mini pc", "Laptop", "Kurumsal laptop", "Gaming laptop"].includes(category)) {
+          if (processor) productData.processor = processor;
+          if (ram) productData.ram = ram;
+          if (ssd) productData.ssd = ssd;
+          if (motherboard) productData.motherboard = motherboard;
+          if (powerSupply) productData.powerSupply = powerSupply;
+          if (graphicsCard) productData.graphicsCard = graphicsCard;
+        }
+
+        // Çevre Birimleri kategorisi için ek alanlar
+        if (category === "Çevre Birimleri") {
+          productData.peripheral = peripheralSelected || null;
+          if (peripheralSelected === "RAM") {
+            if (ramGB !== null) productData.ramGB = ramGB;
+            if (ramMHz !== null) productData.ramMHz = ramMHz;
+            if (ramDDR) productData.ramDDR = ramDDR;
+            if (ramType) productData.ramType = ramType; // Yeni Eklenen Alan
+            if (ramBrand) productData.ramBrand = ramBrand; // RAM Markası Ekleniyor
+          }
+          if (peripheralSelected === "Ekran Kartı") {
+            if (gpuBrand) productData.gpuBrand = gpuBrand; // Güncellenmiş Marka
+            if (gpuModel) productData.gpuModel = gpuModel;
+            if (gpuVram !== null) productData.gpuVram = gpuVram;
+            if (gpuOutputs.length > 0) productData.gpuOutputs = gpuOutputs;
+            if (gpuBitInput) productData.gpuBitInput = gpuBitInput;
+          }
+          if (peripheralSelected === "Monitör") {
+            if (monitorBrand) productData.monitorBrand = monitorBrand;
+            if (monitorModel) productData.monitorModel = monitorModel;
+            if (monitorResolution) productData.monitorResolution = monitorResolution;
+            if (monitorInch !== null) productData.monitorInch = monitorInch;
+            if (monitorHz !== null) productData.monitorHz = monitorHz;
+            if (monitorOutputs.length > 0) productData.monitorOutputs = monitorOutputs;
+          }
+          if (peripheralSelected === "İşlemci") {
+            if (processorBrand) productData.processorBrand = processorBrand;
+            if (processorModel) productData.processorModel = processorModel;
+            if (processorCores !== null) productData.processorCores = processorCores;
+            if (processorGHz !== null) productData.processorGHz = processorGHz;
+            if (processorTurboGHz !== null) productData.processorTurboGHz = processorTurboGHz;
+            if (processorTDP !== null) productData.processorTDP = processorTDP;
+            if (processorCache) productData.processorCache = processorCache; // Önbellek alanını ekledik
+            if (processorSocketType) productData.processorSocketType = processorSocketType;
+          }
+          if (peripheralSelected === "Depolama") {
+            if (storageType) productData.storageType = storageType;
+            if (storageSize !== null) productData.storageSize = storageSize;
+            if (storageBrand) productData.storageBrand = storageBrand; // Depolama Markası Ekleniyor
+            if (storageReadSpeed !== null) productData.storageReadSpeed = storageReadSpeed; // Depolama Okuma Hızı Ekleniyor
+            if (storageWriteSpeed !== null) productData.storageWriteSpeed = storageWriteSpeed; // Depolama Yazma Hızı Ekleniyor
+          }
+          // Anakart
+          if (peripheralSelected === "Anakart") {
+            if (motherboardBrand) productData.motherboardBrand = motherboardBrand;
+            if (socketType) productData.socketType = socketType;
+            if (motherboardModel) productData.motherboardModel = motherboardModel;
+            productData.m2Support = m2Support; // Checkbox her zaman boolean döner
+
+            // Yeni Eklenen Alanlar
+            if (ramSlots !== null) productData.ramSlots = ramSlots;
+            if (maxRam !== null) productData.maxRam = maxRam;
+            if (maxRamMHz !== null) productData.maxRamMHz = maxRamMHz;
+          }
+          // Bilgisayar Kasa için ek alanlar
+          if (peripheralSelected === "Bilgisayar Kasa") {
+            if (caseType) productData.caseType = caseType;
+            productData.casePowerSupply = casePowerSupply;
+
+            if (casePowerSupply) {
+              if (powerWatt !== null && !isNaN(powerWatt)) {
+                productData.casePowerWatt = powerWatt;
+              }
+            }
+
+            if (caseStyle) productData.caseStyle = caseStyle;
+
+            if (caseBrand) productData.caseBrand = caseBrand;
+          }
+        }
+
+        // Cisco Networks kategorisi için ek alanlar
+        if (category === "Cisco networks") {
+          productData.ciscoSubCategory = ciscoSubCategory || null;
+          if (ciscoSubCategory === "Switches") {
+            if (ciscoModel) productData.ciscoSwitchModel = ciscoModel;
+          }
+          if (ciscoSubCategory === "Routers") {
+            if (ciscoModel) productData.ciscoRouterModel = ciscoModel;
+          }
+          if (ciscoSubCategory === "Access Points") {
+            if (ciscoModel) productData.ciscoAccessPointModel = ciscoModel;
+          }
+        }
+
+        // Aruba Networks kategorisi için ek alanlar
+        if (category === "Aruba networks") {
+          productData.arubaSubCategory = arubaSubCategory || null;
+          if (arubaSubCategory === "Switches") {
+            if (arubaModel) productData.arubaSwitchModel = arubaModel;
+          }
+          if (arubaSubCategory === "Wireless Access Points") {
+            if (arubaModel) productData.arubaWirelessAPModel = arubaModel;
+          }
+          if (arubaSubCategory === "Network Management") {
+            if (arubaModel) productData.arubaNetworkMgmtModel = arubaModel;
+          }
+        }
+
+        // Cisco Systems kategorisi için ek alanlar
+        if (category === "Cisco Systems") {
+          productData.ciscoSystemsSubCategory = ciscoSystemsSubCategory || null;
+          if (ciscoSystemsSubCategory === "Security") {
+            if (ciscoSystemsModel) productData.ciscoSystemsSecurityModel = ciscoSystemsModel;
+          }
+          if (ciscoSystemsSubCategory === "Collaboration") {
+            if (ciscoSystemsModel) productData.ciscoSystemsCollaborationModel = ciscoSystemsModel;
+          }
+          if (ciscoSystemsSubCategory === "SD-WAN & Software-Defined Networking") {
+            if (ciscoSystemsModel) productData.ciscoSystemsSDWANModel = ciscoSystemsModel;
+          }
+          if (ciscoSystemsSubCategory === "Meraki MX") {
+            if (ciscoSystemsModel) productData.ciscoSystemsMerakiMXModel = ciscoSystemsModel;
+          }
+        }
+
+        // Sunucu kategorisi için ek alanlar
+        if (category === "Sunucu") {
+          productData.serverDetails = {
+            subCategory: serverSubCategory || null,
+            model: serverModel || null,
+            // Sunucuya özel diğer alanlar
+            // Örneğin, İşlemci, RAM, Depolama
+            processor: document.getElementById('serverProcessor') ? document.getElementById('serverProcessor').value.trim() : null,
+            ram: document.getElementById('serverRAM') ? document.getElementById('serverRAM').value.trim() : null,
+            storage: document.getElementById('serverStorage') ? document.getElementById('serverStorage').value.trim() : null
+          };
+          // Ek sunucu alanları eklenebilir
+        }
+
+        // Sunucu Çevre Birimleri kategorisi için ek alanlar
+        if (category === "Sunucu Çevre Birimleri") {
+          productData.serverPeripherals = serverPeripherals;
+        }
+
+        await addDoc(productsCollection, productData);
+
+        alert("Ürün başarıyla eklendi!");
+
+        // Formu sıfırla ve ek alanları gizle
+        document.getElementById("productForm").reset();
+        document.getElementById('additionalFields').style.display = 'none';
+        document.getElementById('peripheralFields').style.display = 'none';
+        document.getElementById('ciscoFields').style.display = 'none';
+        document.getElementById('arubaFields').style.display = 'none';
+        document.getElementById('ciscoSystemsFields').style.display = 'none';
+        document.getElementById('serverFields').style.display = 'none';
+        document.getElementById('serverPeripheralFields').style.display = 'none';
+        document.getElementById('peripheralFieldsComputerCase').style.display = 'none'; // Bilgisayar Kasa Alanını Gizle
+        document.getElementById('powerWattField').style.display = 'none'; // Power Watt Alanını Gizle
+      } catch (e) {
+        console.error("Hata: ", e);
+        alert("Ürün eklenirken bir hata oluştu.");
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('addProductButton').addEventListener('click', addProduct);
+    });
+  </script>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="../../../index.html">Your Store</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+        aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-center" id="navbarContent">
+        <!-- Ortalanmış Navbar Linkleri -->
+        <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="urunekle.html">Ürün Ekle</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="urunduzenle.html">Ürün Düzenle</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Ürün ekleme formu -->
+  <div class="container mt-5">
+    <h1 class="mb-4">Yeni Ürün Ekle</h1>
+    <form id="productForm">
+      <div class="mb-3">
+        <label for="productName" class="form-label">Ürün Adı</label>
+        <input type="text" class="form-control" id="productName" placeholder="Ürün adı">
+      </div>
+      <div class="mb-3">
+        <label for="productDescription" class="form-label">Ürün Açıklaması</label>
+        <input type="text" class="form-control" id="productDescription" placeholder="Ürün açıklaması">
+      </div>
+      <div class="mb-3">
+        <label for="productPrice" class="form-label">Fiyat</label>
+        <input type="number" class="form-control" id="productPrice" placeholder="Fiyat">
+      </div>
+      <div class="mb-3">
+        <label for="productCategory" class="form-label">Kategori Seçin</label>
+        <select class="form-control" id="productCategory">
+          <option value="" disabled selected>Bir kategori seçin</option>
+          <option value="Bilgisayar">Bilgisayar</option>
+          <option value="Oyun Bilgisayarı">Oyun Bilgisayarı</option>
+          <option value="All in One Bilgisayar">All in One Bilgisayar</option>
+          <option value="Bilgisayar Bileşenleri">Bilgisayar Bileşenleri</option>
+          <option value="Mini pc">Mini pc</option>
+          <option value="Laptop">Laptop</option>
+          <option value="Kurumsal laptop">Kurumsal laptop</option>
+          <option value="Gaming laptop">Gaming laptop</option>
+          <option value="Çevre Birimleri">Çevre Birimleri</option>
+          <option value="Cisco networks">Cisco Networks</option>
+          <option value="Aruba networks">Aruba Networks</option>
+          <option value="Cisco Systems">Cisco Systems</option>
+          <option value="Sunucu">Sunucu</option> <!-- Yeni Sunucu Kategorisi -->
+          <option value="Sunucu Çevre Birimleri">Sunucu Çevre Birimleri</option> <!-- Yeni Sunucu Çevre Birimleri Kategorisi -->
+          <option value="2. El Ürünler">2. El Ürünler</option>
+          <option value="Fırsat Ürünleri">Fırsat Ürünleri</option>
+        </select>
+      </div>
+
+      <!-- İkinci El Checkbox'ı Eklendi -->
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="isSecondHand">
+        <label class="form-check-label" for="isSecondHand">İkinci El</label>
+      </div>
+
+      <!-- Fırsat Ürünleri Checkbox'ı Eklendi -->
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="isFirsatUrunleri">
+        <label class="form-check-label" for="isFirsatUrunleri">Fırsat Ürünleri</label>
+      </div>
+
+      <!-- Bilgisayar Bileşenleri alanları -->
+      <div id="additionalFields" style="display: none;">
+        <div class="mb-3">
+          <label for="processor" class="form-label">İşlemci</label>
+          <input type="text" class="form-control" id="processor" placeholder="İşlemci modeli">
+        </div>
+        <div class="mb-3">
+          <label for="ram" class="form-label">Ram</label>
+          <input type="text" class="form-control" id="ram" placeholder="Ram kapasitesi">
+        </div>
+        <div class="mb-3">
+          <label for="ssd" class="form-label">Ssd</label>
+          <input type="text" class="form-control" id="ssd" placeholder="Ssd kapasitesi">
+        </div>
+        <div class="mb-3">
+          <label for="motherboard" class="form-label">Anakart</label>
+          <input type="text" class="form-control" id="motherboard" placeholder="Anakart modeli">
+        </div>
+        <div class="mb-3">
+          <label for="powerSupply" class="form-label">Power Supply</label>
+          <input type="text" class="form-control" id="powerSupply" placeholder="Güç kaynağı">
+        </div>
+        <div class="mb-3">
+          <label for="graphicsCard" class="form-label">Ekran Kartı</label>
+          <input type="text" class="form-control" id="graphicsCard" placeholder="Ekran kartı modeli">
+        </div>
+      </div>
+
+      <!-- Çevre Birimleri alanları -->
+      <div id="peripheralFields" style="display: none;">
+        <div class="mb-3">
+          <label for="peripheralSelect" class="form-label">Çevre Birimi Seçin</label>
+          <select class="form-control" id="peripheralSelect">
+            <option value="" disabled selected>Bir çevre birimi seçin</option>
+            <option value="Mouse">Mouse</option>
+            <option value="Klavye">Klavye</option>
+            <option value="Monitör">Monitör</option>
+            <option value="Ekran Kartı">Ekran Kartı</option>
+            <option value="İşlemci">İşlemci</option>
+            <option value="Depolama">Depolama</option>
+            <option value="Anakart">Anakart</option>
+            <option value="RAM">RAM</option>
+            <option value="Bilgisayar Kasa">Bilgisayar Kasa</option> <!-- Yeni Bilgisayar Kasa Seçeneği -->
+          </select>
+        </div>
+
+        <!-- RAM -->
+        <div id="peripheralFieldsRAM" style="display: none;">
+          <div class="mb-3">
+            <label for="ramGB" class="form-label">RAM Kapasitesi (GB)</label>
+            <input type="number" class="form-control" id="ramGB" placeholder="RAM kapasitesi (GB)" min="1">
+          </div>
+          <div class="mb-3">
+            <label for="ramMHz" class="form-label">RAM Hızı (MHz)</label>
+            <input type="number" class="form-control" id="ramMHz" placeholder="RAM hızı (MHz)" min="1">
+          </div>
+          <div class="mb-3">
+            <label for="ramDDRSelect" class="form-label">DDR Tipi</label>
+            <select class="form-control" id="ramDDRSelect">
+              <option value="" disabled selected>DDR Tipi seçin</option>
+              <option value="DDR3">DDR3</option>
+              <option value="DDR4">DDR4</option>
+              <option value="DDR5">DDR5</option>
+            </select>
+          </div>
+          <!-- Yeni Eklenen RAM Tipi Select Box -->
+          <div class="mb-3">
+            <label for="ramTypeSelect" class="form-label">RAM Tipi</label>
+            <select class="form-control" id="ramTypeSelect">
+              <option value="" disabled selected>RAM tipi seçin</option>
+              <option value="Düz">Düz</option>
+              <option value="Soğutuculu">Soğutuculu</option>
+              <option value="RGB'li">RGB'li</option>
+            </select>
+          </div>
+          <!-- Yeni Eklenen RAM Markası Input Alanı -->
+          <div class="mb-3">
+            <label for="ramBrandInput" class="form-label">RAM Markası</label>
+            <input type="text" class="form-control" id="ramBrandInput" placeholder="RAM markası">
+          </div>
+        </div>
+
+        <!-- Anakart -->
+        <div id="peripheralFieldsMotherboard" style="display: none;">
+          <div class="mb-3">
+            <label for="motherboardBrandSelect" class="form-label">Anakart Markası</label>
+            <select class="form-control" id="motherboardBrandSelect">
+              <option value="" disabled selected>Marka seçin</option>
+              <option value="AMD">AMD</option>
+              <option value="Intel">Intel</option>
+            </select>
+          </div>
+
+          <!-- AMD Soket Seçenekleri -->
+          <div id="amdSocketOptions" style="display: none;">
+            <label for="amdSocketTypeSelect" class="form-label">AMD Soket Tipi</label>
+            <select class="form-control" id="amdSocketTypeSelect">
+              <option value="" disabled selected>AMD Soket Tipi Seçin</option>
+              <option value="AM3">AM3 (DDR3)</option>
+              <option value="AM4">AM4 (DDR4)</option>
+              <option value="AM5">AM5 (DDR5)</option>
+            </select>
+          </div>
+
+          <!-- Intel Soket Seçenekleri -->
+          <div id="intelSocketOptions" style="display: none;">
+            <label for="intelSocketTypeSelect" class="form-label">Intel Soket Tipi</label>
+            <select class="form-control" id="intelSocketTypeSelect">
+              <option value="" disabled selected>Intel Soket Tipi Seçin</option>
+              <option value="LGA 1700">LGA 1700 (DDR4/DDR5)</option>
+              <option value="LGA 1200">LGA 1200 (DDR4)</option>
+              <option value="LGA 1151">LGA 1151 (DDR4)</option>
+              <option value="LGA 1150">LGA 1150 (DDR3)</option>
+              <!-- Diğer seçenekler -->
+            </select>
+          </div>
+
+          <!-- Anakart modeli ve M2 desteği -->
+          <div id="motherboardModelField" class="mb-3">
+            <label for="motherboardModel" class="form-label">Anakart Modeli</label>
+            <input type="text" class="form-control" id="motherboardModel" placeholder="Anakart modeli">
+          </div>
+
+          <div id="m2SupportField" class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="m2Support">
+            <label class="form-check-label" for="m2Support">M2 desteği var mı?</label>
+          </div>
+
+          <!-- Yeni Eklenen Alanlar -->
+          <div class="mb-3">
+            <label for="ramSlots" class="form-label">RAM Slotu Sayısı</label>
+            <input type="number" class="form-control" id="ramSlots" placeholder="RAM slotu sayısı" min="1">
+          </div>
+          <div class="mb-3">
+            <label for="maxRam" class="form-label">Maksimum RAM Desteği (GB)</label>
+            <input type="number" class="form-control" id="maxRam" placeholder="Maksimum RAM desteği (GB)" min="1">
+          </div>
+          <div class="mb-3">
+            <label for="maxRamMHz" class="form-label">Maksimum RAM Hızı (MHz)</label>
+            <input type="number" class="form-control" id="maxRamMHz" placeholder="Maksimum RAM hızı (MHz)" min="1">
+          </div>
+        </div>
+
+        <!-- Ekran Kartı -->
+        <div id="peripheralFieldsGPU" style="display: none;">
+          <div class="mb-3">
+            <label for="gpuBrandInput" class="form-label">Ekran Kartı Markası</label>
+            <input type="text" class="form-control" id="gpuBrandInput" placeholder="Ekran kartı markası">
+          </div>
+          <div id="gpuModelField" class="mb-3">
+            <label for="gpuModel" class="form-label">Ekran Kartı Modeli</label>
+            <input type="text" class="form-control" id="gpuModel" placeholder="Ekran kartı modeli">
+          </div>
+          <div id="gpuVramField" class="mb-3">
+            <label for="gpuVram" class="form-label">VRAM (GB)</label>
+            <input type="number" class="form-control" id="gpuVram" placeholder="VRAM kapasitesi (GB)" min="1">
+          </div>
+
+          <!-- Yeni Ekran Kartı Görüntü Çıkışları -->
+          <div class="mb-3">
+            <label class="form-label">Görüntü Çıkışları</label>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="gpuHDMI">
+              <label class="form-check-label" for="gpuHDMI">HDMI</label>
+              <input type="number" class="form-control mt-1" id="gpuHDMICount" placeholder="Adet" min="1" style="width: 100px;">
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="gpuVGA">
+              <label class="form-check-label" for="gpuVGA">VGA</label>
+              <input type="number" class="form-control mt-1" id="gpuVGACount" placeholder="Adet" min="1" style="width: 100px;">
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="gpuDisplayPort">
+              <label class="form-check-label" for="gpuDisplayPort">DisplayPort</label>
+              <input type="number" class="form-control mt-1" id="gpuDisplayPortCount" placeholder="Adet" min="1" style="width: 100px;">
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="gpuDVI">
+              <label class="form-check-label" for="gpuDVI">DVI</label>
+              <input type="number" class="form-control mt-1" id="gpuDVICount" placeholder="Adet" min="1" style="width: 100px;">
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="gpuOther">
+              <label class="form-check-label" for="gpuOther">Diğer</label>
+              <input type="text" class="form-control mt-1" id="gpuOtherInput" placeholder="Diğer çıkış türü">
+              <input type="number" class="form-control mt-1" id="gpuOtherCount" placeholder="Adet" min="1" style="width: 100px;">
+            </div>
+          </div>
+
+          <!-- Bit Girişi -->
+          <div class="mb-3">
+            <label for="gpuBitInput" class="form-label">Bit Girişi</label>
+            <input type="text" class="form-control" id="gpuBitInput" placeholder="Bit girişi">
+          </div>
+        </div>
+
+        <!-- Monitör -->
+        <div id="peripheralFieldsMonitor" style="display: none;">
+          <div class="mb-3">
+            <label for="monitorBrandSelect" class="form-label">Monitör Markası</label>
+            <select class="form-control" id="monitorBrandSelect">
+              <option value="" disabled selected>Marka seçin</option>
+              <option value="Samsung">Samsung</option>
+              <option value="LG">LG</option>
+              <option value="Dell">Dell</option>
+              <option value="HP">HP</option>
+              <option value="BenQ">BenQ</option>
+            </select>
+          </div>
+          <div id="monitorModelField" class="mb-3" style="display: none;">
+            <label for="monitorModel" class="form-label">Monitör Modeli</label>
+            <input type="text" class="form-control" id="monitorModel" placeholder="Monitör modeli">
+          </div>
+          <div class="mb-3">
+            <label for="monitorResolution" class="form-label">Çözünürlük</label>
+            <input type="text" class="form-control" id="monitorResolution" placeholder="Çözünürlük">
+          </div>
+          <div class="mb-3">
+            <label for="monitorInch" class="form-label">İnç</label>
+            <input type="number" class="form-control" id="monitorInch" placeholder="İnç" min="1">
+          </div>
+          <div class="mb-3">
+            <label for="monitorHz" class="form-label">Hz</label>
+            <input type="number" class="form-control" id="monitorHz" placeholder="Hz" min="1">
+          </div>
+
+          <!-- Yeni Monitör Giriş/Çıkışları -->
+          <div class="mb-3">
+            <label class="form-label">Giriş/Çıkış Çıkışları</label>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="monitorHDMI">
+              <label class="form-check-label" for="monitorHDMI">HDMI</label>
+              <input type="number" class="form-control mt-1" id="monitorHDMICount" placeholder="Adet" min="1" style="width: 100px;">
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="monitorVGA">
+              <label class="form-check-label" for="monitorVGA">VGA</label>
+              <input type="number" class="form-control mt-1" id="monitorVGACount" placeholder="Adet" min="1" style="width: 100px;">
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="monitorDisplayPort">
+              <label class="form-check-label" for="monitorDisplayPort">DisplayPort</label>
+              <input type="number" class="form-control mt-1" id="monitorDisplayPortCount" placeholder="Adet" min="1" style="width: 100px;">
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="monitorDVI">
+              <label class="form-check-label" for="monitorDVI">DVI</label>
+              <input type="number" class="form-control mt-1" id="monitorDVICount" placeholder="Adet" min="1" style="width: 100px;">
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="monitorOther">
+              <label class="form-check-label" for="monitorOther">Diğer</label>
+              <input type="text" class="form-control mt-1" id="monitorOtherInput" placeholder="Diğer çıkış türü">
+              <input type="number" class="form-control mt-1" id="monitorOtherCount" placeholder="Adet" min="1" style="width: 100px;">
+            </div>
+          </div>
+        </div>
+
+        <!-- İşlemci -->
+        <div id="peripheralFieldsProcessor" style="display: none;">
+          <div class="mb-3">
+            <label for="processorBrandSelect" class="form-label">İşlemci Markası</label>
+            <select class="form-control" id="processorBrandSelect">
+              <option value="" disabled selected>Marka seçin</option>
+              <option value="AMD">AMD</option>
+              <option value="Intel">Intel</option>
+            </select>
+          </div>
+
+          <!-- AMD İşlemci Soket Seçenekleri -->
+          <div id="amdProcessorSocketOptions" style="display: none;">
+            <label for="amdProcessorSocketSelect" class="form-label">AMD İşlemci Soket Tipi</label>
+            <select class="form-control" id="amdProcessorSocketSelect">
+              <option value="" disabled selected>AMD Soket Tipi Seçin</option>
+              <option value="AM3">AM3 (DDR3)</option>
+              <option value="AM4">AM4 (DDR4)</option>
+              <option value="AM5">AM5 (DDR5)</option>
+            </select>
+          </div>
+
+          <!-- Intel İşlemci Soket Seçenekleri -->
+          <div id="intelProcessorSocketOptions" style="display: none;">
+            <label for="intelProcessorSocketSelect" class="form-label">Intel İşlemci Soket Tipi</label>
+            <select class="form-control" id="intelProcessorSocketSelect">
+              <option value="" disabled selected>Intel Soket Tipi Seçin</option>
+              <option value="LGA 1700">LGA 1700</option>
+              <option value="LGA 1200">LGA 1200</option>
+              <option value="LGA 1151">LGA 1151</option>
+              <option value="LGA 1150">LGA 1150</option>
+            </select>
+          </div>
+
+          <div id="processorModelField" class="mb-3" style="display: none;">
+            <label for="processorModel" class="form-label">İşlemci Modeli</label>
+            <input type="text" class="form-control" id="processorModel" placeholder="İşlemci modeli">
+          </div>
+
+          <!-- Yeni İşlemci Alanları: Çekirdek Sayısı, GHz Hızı ve Önbellek -->
+          <div class="mb-3">
+            <label for="processorCores" class="form-label">Çekirdek Sayısı</label>
+            <input type="number" class="form-control" id="processorCores" placeholder="Çekirdek sayısı" min="1">
+          </div>
+          <div class="mb-3">
+            <label for="processorGHz" class="form-label">Temel GHz Hızı</label>
+            <input type="number" step="0.1" class="form-control" id="processorGHz" placeholder="Temel GHz hızı" min="0.1">
+          </div>
+          <div class="mb-3">
+            <label for="processorTurboGHz" class="form-label">Maksimum Turbo GHz Hızı</label>
+            <input type="number" step="0.1" class="form-control" id="processorTurboGHz" placeholder="Maksimum Turbo GHz hızı" min="0.1">
+          </div>
+          <div class="mb-3">
+            <label for="processorTDP" class="form-label">TDP (Thermal Design Power) (W)</label>
+            <input type="number" class="form-control" id="processorTDP" placeholder="TDP (W)" min="1">
+          </div>
+          <div class="mb-3">
+            <label for="processorCache" class="form-label">Önbellek (MB)</label>
+            <input type="text" class="form-control" id="processorCache" placeholder="Önbellek miktarı (MB)">
+          </div>
+        </div>
+
+        <!-- Depolama -->
+        <div id="peripheralFieldsStorage" style="display: none;">
+          <div class="mb-3">
+            <label for="storageTypeSelect" class="form-label">Depolama Türü</label>
+            <select class="form-control" id="storageTypeSelect">
+              <option value="" disabled selected>Depolama türü seçin</option>
+              <option value="SSD">SSD</option>
+              <option value="M.2 SSD">M.2 SSD</option>
+              <option value="Hard Disk">Hard Disk</option>
+              <option value="NVMe">NVMe</option>
+            </select>
+          </div>
+          <div id="storageSizeField" class="mb-3" style="display: none;">
+            <label for="storageSize" class="form-label">Depolama Boyutu (GB/TB)</label>
+            <input type="number" class="form-control" id="storageSize" placeholder="Depolama kapasitesi" min="1">
+          </div>
+          <!-- Yeni Eklenen Depolama Markası Input Alanı -->
+          <div class="mb-3">
+            <label for="storageBrandInput" class="form-label">Depolama Markası</label>
+            <input type="text" class="form-control" id="storageBrandInput" placeholder="Depolama markası">
+          </div>
+          <!-- Yeni Eklenen Depolama Okuma/Yazma Hızı Input Alanları -->
+          <div class="mb-3">
+            <label for="storageReadSpeed" class="form-label">Okuma Hızı (MB/s)</label>
+            <input type="number" class="form-control" id="storageReadSpeed" placeholder="Okuma hızı (MB/s)" min="1">
+          </div>
+          <div class="mb-3">
+            <label for="storageWriteSpeed" class="form-label">Yazma Hızı (MB/s)</label>
+            <input type="number" class="form-control" id="storageWriteSpeed" placeholder="Yazma hızı (MB/s)" min="1">
+          </div>
+        </div>
+      </div>
+
+      <!-- Cisco Networks alanları -->
+      <div id="ciscoFields" style="display: none;">
+        <div class="mb-3">
+          <label for="ciscoSubCategory" class="form-label">Cisco Alt Kategorisi Seçin</label>
+          <select class="form-control" id="ciscoSubCategory">
+            <option value="" disabled selected>Bir alt kategori seçin</option>
+            <option value="Switches">Switches (Anahtarlar)</option>
+            <option value="Routers">Routers (Yönlendiriciler)</option>
+            <option value="Access Points">Access Points (Erişim Noktaları)</option>
+          </select>
+        </div>
+
+        <!-- Switches (Anahtarlar) -->
+        <div id="ciscoSwitchesFields" style="display: none;">
+          <div class="mb-3">
+            <label for="ciscoSwitchModel" class="form-label">Switch Modeli</label>
+            <select class="form-control" id="ciscoSwitchModel">
+              <option value="" disabled selected>Bir model seçin</option>
+              <option value="Catalyst 9000">Catalyst 9000</option>
+              <option value="Catalyst 2960">Catalyst 2960</option>
+              <option value="Nexus 9000">Nexus 9000</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Routers (Yönlendiriciler) -->
+        <div id="ciscoRoutersFields" style="display: none;">
+          <div class="mb-3">
+            <label for="ciscoRouterModel" class="form-label">Router Modeli</label>
+            <select class="form-control" id="ciscoRouterModel">
+              <option value="" disabled selected>Bir model seçin</option>
+              <option value="ISR 1000">ISR 1000</option>
+              <option value="ISR 4000">ISR 4000</option>
+              <option value="ASR 9000">ASR 9000</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Access Points (Erişim Noktaları) -->
+        <div id="ciscoAccessPointsFields" style="display: none;">
+          <div class="mb-3">
+            <label for="ciscoAccessPointModel" class="form-label">Access Point Modeli</label>
+            <select class="form-control" id="ciscoAccessPointModel">
+              <option value="" disabled selected>Bir model seçin</option>
+              <option value="Aironet Serisi">Aironet Serisi</option>
+              <option value="Catalyst 9100">Catalyst 9100</option>
+              <option value="Meraki MR">Meraki MR</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aruba Networks alanları -->
+      <div id="arubaFields" style="display: none;">
+        <div class="mb-3">
+          <label for="arubaSubCategory" class="form-label">Aruba Alt Kategorisi Seçin</label>
+          <select class="form-control" id="arubaSubCategory">
+            <option value="" disabled selected>Bir alt kategori seçin</option>
+            <option value="Switches">Switches</option>
+            <option value="Wireless Access Points">Wireless Access Points</option>
+            <option value="Network Management">Network Management</option>
+          </select>
+        </div>
+
+        <!-- Switches -->
+        <div id="arubaSwitchesFields" style="display: none;">
+          <div class="mb-3">
+            <label for="arubaSwitchModel" class="form-label">Switch Modeli</label>
+            <select class="form-control" id="arubaSwitchModel">
+              <option value="" disabled selected>Bir model seçin</option>
+              <option value="Aruba 2530">Aruba 2530</option>
+              <option value="Aruba 2930F">Aruba 2930F</option>
+              <option value="Aruba 3810">Aruba 3810</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Wireless Access Points -->
+        <div id="arubaWirelessAPFields" style="display: none;">
+          <div class="mb-3">
+            <label for="arubaWirelessAPModel" class="form-label">Wireless Access Point Modeli</label>
+            <select class="form-control" id="arubaWirelessAPModel">
+              <option value="" disabled selected>Bir model seçin</option>
+              <option value="Aruba 500 Series">Aruba 500 Series</option>
+              <option value="Aruba 300 Series">Aruba 300 Series</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Network Management -->
+        <div id="arubaNetworkMgmtFields" style="display: none;">
+          <div class="mb-3">
+            <label for="arubaNetworkMgmtModel" class="form-label">Network Management Modeli</label>
+            <select class="form-control" id="arubaNetworkMgmtModel">
+              <option value="" disabled selected>Bir model seçin</option>
+              <option value="Aruba Central">Aruba Central</option>
+              <option value="ClearPass">ClearPass</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cisco Systems alanları -->
+      <div id="ciscoSystemsFields" style="display: none;">
+        <div class="mb-3">
+          <label for="ciscoSystemsSubCategory" class="form-label">Cisco Systems Alt Kategorisi Seçin</label>
+          <select class="form-control" id="ciscoSystemsSubCategory">
+            <option value="" disabled selected>Bir alt kategori seçin</option>
+            <option value="Security">Security (Güvenlik)</option>
+            <option value="Collaboration">Collaboration (İş Birliği)</option>
+            <option value="SD-WAN & Software-Defined Networking">SD-WAN & Software-Defined Networking</option>
+            <option value="Meraki MX">Meraki MX</option>
+          </select>
+        </div>
+
+        <!-- Security -->
+        <div id="ciscoSystemsSecurityFields" style="display: none;">
+          <div class="mb-3">
+            <label for="ciscoSystemsSecurityModel" class="form-label">Security Modeli</label>
+            <select class="form-control" id="ciscoSystemsSecurityModel">
+              <option value="" disabled selected>Bir model seçin</option>
+              <option value="ASA Firewalls">ASA Firewalls</option>
+              <option value="Firepower Series">Firepower Series</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Collaboration -->
+        <div id="ciscoSystemsCollaborationFields" style="display: none;">
+          <div class="mb-3">
+            <label for="ciscoSystemsCollaborationModel" class="form-label">Collaboration Modeli</label>
+            <select class="form-control" id="ciscoSystemsCollaborationModel">
+              <option value="" disabled selected>Bir model seçin</option>
+              <option value="IP Telefonlar">IP Telefonlar</option>
+              <option value="Webex Room Devices">Webex Room Devices</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- SD-WAN & Software-Defined Networking -->
+        <div id="ciscoSystemsSDWANFields" style="display: none;">
+          <div class="mb-3">
+            <label for="ciscoSystemsSDWANModel" class="form-label">SD-WAN Modeli</label>
+            <select class="form-control" id="ciscoSystemsSDWANModel">
+              <option value="" disabled selected>Bir model seçin</option>
+              <option value="vEdge Series">vEdge Series</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Meraki MX -->
+        <div id="ciscoSystemsMerakiMXFields" style="display: none;">
+          <div class="mb-3">
+            <label for="ciscoSystemsMerakiMXModel" class="form-label">Meraki MX Modeli</label>
+            <select class="form-control" id="ciscoSystemsMerakiMXModel">
+              <option value="" disabled selected>Bir model seçin</option>
+              <option value="Meraki MX">Meraki MX</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sunucu alanları -->
+      <div id="serverFields" style="display: none;">
+        <div class="mb-3">
+          <label for="serverSubCategory" class="form-label">Sunucu Alt Kategorisi Seçin</label>
+          <select class="form-control" id="serverSubCategory">
+            <option value="" disabled selected>Bir alt kategori seçin</option>
+            <option value="Tower Server">Tower Server</option>
+            <option value="Rack Server">Rack Server</option>
+            <option value="Blade Server">Blade Server</option>
+          </select>
+        </div>
+
+        <!-- Tower Server -->
+        <div id="serverTowerFields" style="display: none;">
+          <div class="mb-3">
+            <label for="serverTowerModel" class="form-label">Tower Server Modeli</label>
+            <input type="text" class="form-control" id="serverTowerModel" placeholder="Tower server modeli">
+          </div>
+          <!-- Tower Server'a özel diğer alanlar -->
+          <div class="mb-3">
+            <label for="serverProcessor" class="form-label">İşlemci</label>
+            <input type="text" class="form-control" id="serverProcessorTower" placeholder="İşlemci modeli">
+          </div>
+          <div class="mb-3">
+            <label for="serverRAM" class="form-label">RAM</label>
+            <input type="text" class="form-control" id="serverRAMTower" placeholder="RAM kapasitesi">
+          </div>
+          <div class="mb-3">
+            <label for="serverStorage" class="form-label">Depolama</label>
+            <input type="text" class="form-control" id="serverStorageTower" placeholder="Depolama kapasitesi">
+          </div>
+        </div>
+
+        <!-- Rack Server -->
+        <div id="serverRackFields" style="display: none;">
+          <div class="mb-3">
+            <label for="serverRackModel" class="form-label">Rack Server Modeli</label>
+            <input type="text" class="form-control" id="serverRackModel" placeholder="Rack server modeli">
+          </div>
+          <!-- Rack Server'a özel diğer alanlar -->
+          <div class="mb-3">
+            <label for="serverProcessorRack" class="form-label">İşlemci</label>
+            <input type="text" class="form-control" id="serverProcessorRack" placeholder="İşlemci modeli">
+          </div>
+          <div class="mb-3">
+            <label for="serverRAMRack" class="form-label">RAM</label>
+            <input type="text" class="form-control" id="serverRAMRack" placeholder="RAM kapasitesi">
+          </div>
+          <div class="mb-3">
+            <label for="serverStorageRack" class="form-label">Depolama</label>
+            <input type="text" class="form-control" id="serverStorageRack" placeholder="Depolama kapasitesi">
+          </div>
+        </div>
+
+        <!-- Blade Server -->
+        <div id="serverBladeFields" style="display: none;">
+          <div class="mb-3">
+            <label for="serverBladeModel" class="form-label">Blade Server Modeli</label>
+            <input type="text" class="form-control" id="serverBladeModel" placeholder="Blade server modeli">
+          </div>
+          <!-- Blade Server'a özel diğer alanlar -->
+          <div class="mb-3">
+            <label for="serverProcessorBlade" class="form-label">İşlemci</label>
+            <input type="text" class="form-control" id="serverProcessorBlade" placeholder="İşlemci modeli">
+          </div>
+          <div class="mb-3">
+            <label for="serverRAMBlade" class="form-label">RAM</label>
+            <input type="text" class="form-control" id="serverRAMBlade" placeholder="RAM kapasitesi">
+          </div>
+          <div class="mb-3">
+            <label for="serverStorageBlade" class="form-label">Depolama</label>
+            <input type="text" class="form-control" id="serverStorageBlade" placeholder="Depolama kapasitesi">
+          </div>
+        </div>
+      </div>
+
+      <!-- Sunucu Çevre Birimleri alanları -->
+      <div id="serverPeripheralFields" style="display: none;">
+        <div class="mb-3">
+          <label for="serverPeripheralSelect" class="form-label">Sunucu Çevre Birimi Seçin</label>
+          <select class="form-control" id="serverPeripheralSelect">
+            <option value="" disabled selected>Bir çevre birimi seçin</option>
+            <option value="Sunucu İşlemcisi">Sunucu İşlemcisi</option>
+            <option value="Sunucu RAM">Sunucu RAM</option>
+            <option value="Sunucu Depolama">Sunucu Depolama</option>
+            <option value="Sunucu Anakart">Sunucu Anakart</option>
+            <option value="HDD">HDD</option>
+            <option value="RAID Controller">RAID Controller</option>
+            <option value="Network Card">Network Card</option>
+            <!-- Diğer sunucu çevre birimleri ekleyebilirsiniz -->
+          </select>
+        </div>
+
+        <!-- Sunucu İşlemcisi -->
+        <div id="serverPeripheralFieldsCPU" style="display: none;">
+          <div class="mb-3">
+            <label for="serverPeripheralProcessorModel" class="form-label">İşlemci Modeli</label>
+            <input type="text" class="form-control" id="serverPeripheralProcessorModel" placeholder="İşlemci modeli">
+          </div>
+          <div class="mb-3">
+            <label for="serverPeripheralProcessorCores" class="form-label">Çekirdek Sayısı</label>
+            <input type="number" class="form-control" id="serverPeripheralProcessorCores" placeholder="Çekirdek sayısı" min="1">
+          </div>
+          <div class="mb-3">
+            <label for="serverPeripheralProcessorGHz" class="form-label">Temel GHz Hızı</label>
+            <input type="number" step="0.1" class="form-control" id="serverPeripheralProcessorGHz" placeholder="Temel GHz hızı" min="0.1">
+          </div>
+          <div class="mb-3">
+            <label for="serverPeripheralProcessorTurboGHz" class="form-label">Maksimum Turbo GHz Hızı</label>
+            <input type="number" step="0.1" class="form-control" id="serverPeripheralProcessorTurboGHz" placeholder="Maksimum Turbo GHz hızı" min="0.1">
+          </div>
+          <div class="mb-3">
+            <label for="serverPeripheralProcessorTDP" class="form-label">TDP (W)</label>
+            <input type="number" class="form-control" id="serverPeripheralProcessorTDP" placeholder="TDP (W)" min="1">
+          </div>
+        </div>
+
+        <!-- Sunucu RAM -->
+        <div id="serverPeripheralFieldsRAM" style="display: none;">
+          <div class="mb-3">
+            <label for="serverPeripheralRAMCapacity" class="form-label">RAM Kapasitesi (GB)</label>
+            <input type="number" class="form-control" id="serverPeripheralRAMCapacity" placeholder="RAM kapasitesi (GB)" min="1">
+          </div>
+          <div class="mb-3">
+            <label for="serverPeripheralRAMMHz" class="form-label">RAM Hızı (MHz)</label>
+            <input type="number" class="form-control" id="serverPeripheralRAMMHz" placeholder="RAM hızı (MHz)" min="1">
+          </div>
+          <div class="mb-3">
+            <label for="serverPeripheralRAMType" class="form-label">RAM Tipi</label>
+            <select class="form-control" id="serverPeripheralRAMType">
+              <option value="" disabled selected>RAM tipi seçin</option>
+              <option value="DDR3">DDR3</option>
+              <option value="DDR4">DDR4</option>
+              <option value="DDR5">DDR5</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="serverPeripheralRAMBrand" class="form-label">RAM Markası</label>
+            <input type="text" class="form-control" id="serverPeripheralRAMBrand" placeholder="RAM markası">
+          </div>
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="serverPeripheralRAMECC">
+            <label class="form-check-label" for="serverPeripheralRAMECC">ECC Desteği</label>
+          </div>
+        </div>
+
+        <!-- Sunucu Depolama -->
+        <div id="serverPeripheralFieldsStorage" style="display: none;">
+          <div class="mb-3">
+            <label for="serverPeripheralStorageType" class="form-label">Depolama Türü</label>
+            <select class="form-control" id="serverPeripheralStorageType">
+              <option value="" disabled selected>Depolama türü seçin</option>
+              <option value="SSD">SSD</option>
+              <option value="HDD">HDD</option>
+              <option value="M.2 SSD">M.2 SSD</option>
+              <option value="NVMe">NVMe</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="serverPeripheralStorageCapacity" class="form-label">Depolama Kapasitesi (GB/TB)</label>
+            <input type="number" class="form-control" id="serverPeripheralStorageCapacity" placeholder="Depolama kapasitesi" min="1">
+          </div>
+          <div class="mb-3">
+            <label for="serverPeripheralStorageBrand" class="form-label">Depolama Markası</label>
+            <input type="text" class="form-control" id="serverPeripheralStorageBrand" placeholder="Depolama markası">
+          </div>
+          <div class="mb-3">
+            <label for="serverPeripheralStorageReadSpeed" class="form-label">Okuma Hızı (MB/s)</label>
+            <input type="number" class="form-control" id="serverPeripheralStorageReadSpeed" placeholder="Okuma hızı (MB/s)" min="1">
+          </div>
+          <div class="mb-3">
+            <label for="serverPeripheralStorageWriteSpeed" class="form-label">Yazma Hızı (MB/s)</label>
+            <input type="number" class="form-control" id="serverPeripheralStorageWriteSpeed" placeholder="Yazma hızı (MB/s)" min="1">
+          </div>
+        </div>
+
+        <!-- Sunucu Anakart -->
+        <div id="serverPeripheralFieldsMotherboard" style="display: none;">
+          <div class="mb-3">
+            <label for="serverPeripheralMotherboardBrand" class="form-label">Anakart Markası</label>
+            <select class="form-control" id="serverPeripheralMotherboardBrand">
+              <option value="" disabled selected>Marka seçin</option>
+              <option value="AMD">AMD</option>
+              <option value="Intel">Intel</option>
+            </select>
+          </div>
+
+          <!-- AMD Soket Seçenekleri -->
+          <div id="serverPeripheralAMDSocketOptions" style="display: none;">
+            <label for="serverPeripheralMotherboardSocket" class="form-label">AMD Soket Tipi</label>
+            <select class="form-control" id="serverPeripheralMotherboardSocket">
+              <option value="" disabled selected>AMD Soket Tipi Seçin</option>
+              <option value="AM3">AM3 (DDR3)</option>
+              <option value="AM4">AM4 (DDR4)</option>
+              <option value="AM5">AM5 (DDR5)</option>
+            </select>
+          </div>
+
+          <!-- Intel Soket Seçenekleri -->
+          <div id="serverPeripheralIntelSocketOptions" style="display: none;">
+            <label for="serverPeripheralMotherboardSocket" class="form-label">Intel Soket Tipi</label>
+            <select class="form-control" id="serverPeripheralMotherboardSocket">
+              <option value="" disabled selected>Intel Soket Tipi Seçin</option>
+              <option value="LGA 1700">LGA 1700 (DDR4/DDR5)</option>
+              <option value="LGA 1200">LGA 1200 (DDR4)</option>
+              <option value="LGA 1151">LGA 1151 (DDR4)</option>
+              <option value="LGA 1150">LGA 1150 (DDR3)</option>
+              <!-- Diğer seçenekler -->
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="serverPeripheralMotherboardModel" class="form-label">Anakart Modeli</label>
+            <input type="text" class="form-control" id="serverPeripheralMotherboardModel" placeholder="Anakart modeli">
+          </div>
+
+          <div class="mb-3">
+            <label for="serverPeripheralMotherboardM2" class="form-label">M2 Desteği</label>
+            <select class="form-control" id="serverPeripheralMotherboardM2">
+              <option value="" disabled selected>Seçin</option>
+              <option value="Var">Var</option>
+              <option value="Yok">Yok</option>
+            </select>
+          </div>
+
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="serverPeripheralMotherboardRAID">
+            <label class="form-check-label" for="serverPeripheralMotherboardRAID">RAID Desteği Var mı?</label>
+          </div>
+        </div>
+
+        <!-- HDD -->
+        <div id="serverPeripheralFieldsHDD" style="display: none;">
+          <div class="mb-3">
+            <label for="serverPeripheralHDD" class="form-label">HDD Modeli</label>
+            <input type="text" class="form-control" id="serverPeripheralHDD" placeholder="HDD modeli">
+          </div>
+          <div class="mb-3">
+            <label for="serverPeripheralHDDCapacity" class="form-label">Kapasite (GB/TB)</label>
+            <input type="number" class="form-control" id="serverPeripheralHDDCapacity" placeholder="Kapasite" min="1">
+          </div>
+          <div class="mb-3">
+            <label for="serverPeripheralHDDSpeed" class="form-label">Hız (RPM)</label>
+            <input type="number" class="form-control" id="serverPeripheralHDDSpeed" placeholder="Hız (RPM)" min="1">
+          </div>
+          <div class="mb-3">
+            <label for="serverPeripheralHDDCache" class="form-label">Cache Boyutu (MB)</label>
+            <input type="number" class="form-control" id="serverPeripheralHDDCache" placeholder="Cache Boyutu (MB)" min="1">
+          </div>
+        </div>
+
+        <!-- RAID Controller -->
+        <div id="serverPeripheralFieldsRAID" style="display: none;">
+          <div class="mb-3">
+            <label for="serverPeripheralRAIDController" class="form-label">RAID Controller Modeli</label>
+            <input type="text" class="form-control" id="serverPeripheralRAIDController" placeholder="RAID controller modeli">
+          </div>
+          <div class="mb-3">
+            <label for="serverPeripheralRAIDLevels" class="form-label">Desteklenen RAID Seviyeleri</label>
+            <input type="text" class="form-control" id="serverPeripheralRAIDLevels" placeholder="RAID seviyeleri (örn. RAID 0, RAID 1, RAID 5)">
+          </div>
+        </div>
+
+        <!-- Network Card -->
+        <div id="serverPeripheralFieldsNetwork" style="display: none;">
+          <div class="mb-3">
+            <label for="serverPeripheralNetworkCard" class="form-label">Network Card Modeli</label>
+            <input type="text" class="form-control" id="serverPeripheralNetworkCard" placeholder="Network card modeli">
+          </div>
+          <div class="mb-3">
+            <label for="serverPeripheralNetworkSpeed" class="form-label">Bağlantı Hızı (Gbps)</label>
+            <input type="number" step="0.1" class="form-control" id="serverPeripheralNetworkSpeed" placeholder="Bağlantı hızı (Gbps)" min="0.1">
+          </div>
+          <div class="mb-3">
+            <label for="serverPeripheralNetworkPorts" class="form-label">Port Sayısı</label>
+            <input type="number" class="form-control" id="serverPeripheralNetworkPorts" placeholder="Port sayısı" min="1">
+          </div>
+          <div class="mb-3">
+            <label for="serverPeripheralNetworkTechnologies" class="form-label">Desteklenen Teknolojiler</label>
+            <input type="text" class="form-control" id="serverPeripheralNetworkTechnologies" placeholder="Teknolojiler (örn. Ethernet, Fiber)">
+          </div>
+        </div>
+      </div>
+
+      <!-- Bilgisayar Kasa -->
+      <div id="peripheralFieldsComputerCase" style="display: none;">
+        <div class="mb-3">
+          <label class="form-label">Kasa Tipi</label>
+          <div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="caseType" id="caseTypeYatay" value="Yatay">
+              <label class="form-check-label" for="caseTypeYatay">Yatay</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="caseType" id="caseTypeTower" value="Tower">
+              <label class="form-check-label" for="caseTypeTower">Tower</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kasa Stili her zaman görünür -->
+        <div class="mb-3">
+          <label for="caseStyleSelect" class="form-label">Kasa Stili</label>
+          <select class="form-control" id="caseStyleSelect">
+            <option value="" disabled selected>Bir stil seçin</option>
+            <option value="Düz">Düz</option>
+            <option value="Ofis">Ofis</option>
+            <option value="RGB'li">RGB'li</option>
+          </select>
+        </div>
+
+        <!-- Power Supply Checkbox ve Watt Girişi -->
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="casePowerSupply">
+          <label class="form-check-label" for="casePowerSupply">Power Supply Ekle</label>
+        </div>
+
+        <div class="mb-3" id="powerWattField" style="display: none;">
+          <label for="powerWattInput" class="form-label">Power Supply Watt (W)</label>
+          <input type="number" class="form-control" id="powerWattInput" placeholder="Power Supply Watt" min="1">
+        </div>
+
+        <div class="mb-3">
+          <label for="caseBrandInput" class="form-label">Kasa Markası</label>
+          <input type="text" class="form-control" id="caseBrandInput" placeholder="Kasa markası">
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="productImageFile" class="form-label">Resim Yükle</label>
+        <input type="file" class="form-control" id="productImageFile" multiple>
+      </div>
+      
+      <button type="button" id="addProductButton" class="btn btn-primary">Ürün Ekle</button>
+    </form>
+  </div>
+
+  <!-- JavaScript bağımlılıkları -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
