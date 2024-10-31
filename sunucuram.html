@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ürün Listesi</title>
+  <title>Allure Electronic</title>
 
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -14,7 +14,7 @@
   <link rel="shortcut icon" type="image/png" href="favicon.png" />
   <!-- Custom Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css">
   <!-- Firebase Configuration and Scripts -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
@@ -35,83 +35,86 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Sadece "İkinci El" olan ürünleri depolamak için dizi
-    let secondHandProducts = [];
+    // Tüm ürünleri depolamak için dizi
+    let allProducts = [];
 
-    /**
-     * Firebase'den sadece "İkinci El" ürünleri çekip sayfaya ekleyen fonksiyon
-     */
     async function fetchProducts() {
-      const productsCollection = collection(db, "products");
-      const q = query(productsCollection, where("isSecondHand", "==", true)); // Sadece isSecondHand=true olanları çek
-      const querySnapshot = await getDocs(q);
-      const productsContainer = document.getElementById("productsTableBody");
-      productsContainer.innerHTML = ''; // Mevcut ürünleri temizle
+  const productsCollection = collection(db, "products");
+  const q = query(productsCollection, where("category", "==", "Sunucu Çevre Birimleri"));
 
-      secondHandProducts = []; // Ürünler dizisini sıfırla
+  const querySnapshot = await getDocs(q);
+  const tableBody = document.getElementById("productsTableBody");
+  tableBody.innerHTML = ''; // Mevcut ürünleri temizle
 
-      querySnapshot.forEach((doc) => {
-        const product = doc.data();
-        const productName = product.name || "Bilinmeyen Ürün";
-        const productPrice = product.price ? `${product.price}₺` : "Fiyat Bilinmiyor";
-        const productCategory = product.category || "Kategori: Bilinmiyor";
-        const imageUrls = product.image_urls || [];
-        const productPeripheral = product.peripheral;
+  allProducts = []; // Ürünler dizisini sıfırla
 
-        // Ürün verilerini içeren obje
-        let productObj = {
-          name: productName.toLowerCase(),
-          category: productCategory.toLowerCase(),
-          html:
-            `<div class="col-lg-3 col-md-4 col-sm-6 mb-4 d-flex align-items-stretch">
-              <div class="card h-100 shadow-sm product-card border-0">
-                <a href="urunDetay.html?id=${doc.id}" class="text-decoration-none text-dark">
-                  <div class="position-relative">
-                    <img src="${imageUrls[0] || 'default-image.jpg'}" class="card-img-top rounded-top" alt="${productName}" style="height: 200px; object-fit: contain;">
-                    ${
-                      productPeripheral
-                        ? `<span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">${productPeripheral}</span>`
-                        : `<span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">${productCategory}</span>`
-                    }
-                  </div>
-                  <div class="card-body d-flex flex-column">
-                    <h5 class="card-title fw-bold">${productName}</h5>
-                    <p class="card-text text-muted mb-2">${productCategory}</p>
-                    <div class="mt-auto">
-                      <p class="card-text fs-5 text-danger">${productPrice}</p>
-                      <button class="btn btn-outline-warning w-100">
-                        Detayları Gör <i class="fas fa-arrow-right ms-2"></i>
-                      </button>
-                    </div>
-                  </div>
-                </a>
+  querySnapshot.forEach((doc) => {
+    const product = doc.data();
+
+    // Yalnızca serverPeripherals.ram alanı olanları göster
+    if (!product.serverPeripherals || !product.serverPeripherals.ram) return;
+
+    const productName = product.name || "Bilinmeyen Ürün";
+    const productPrice = product.price ? `${product.price}₺` : "Fiyat Bilinmiyor";
+    const productCategory = product.category || "Kategori: Bilinmiyor";
+    const imageUrls = product.image_urls || [];
+    const ramDetails = product.serverPeripherals.ram;
+
+    // RAM bilgisi
+    const ramInfo = ``;
+
+    // Ürün verilerini içeren obje
+    let productObj = {
+      name: productName.toLowerCase(),
+      category: productCategory.toLowerCase(),
+      html:
+        `<div class="col-lg-3 col-md-4 col-sm-6 mb-4 d-flex align-items-stretch">
+          <div class="card h-100 shadow-sm product-card border-0">
+            <a href="urunDetay.html?id=${doc.id}" class="text-decoration-none text-dark">
+              <div class="position-relative">
+                <img src="${imageUrls[0] || 'default-image.jpg'}" class="card-img-top rounded-top" alt="${productName}" style="height: 200px; object-fit: contain;">
+                <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">${productCategory}</span>
               </div>
-            </div>`
-        };
+              <div class="card-body d-flex flex-column">
+                <h5 class="card-title fw-bold">${productName}</h5>
+                <p class="card-text text-muted mb-2">${productCategory}</p>
+                ${ramInfo} <!-- Yalnızca RAM bilgilerini göster -->
+                <div class="mt-auto">
+                  <p class="card-text fs-5 text-danger">${productPrice}</p>
+                  <button class="btn btn-outline-warning w-100">
+                    Detayları Gör <i class="fas fa-arrow-right ms-2"></i>
+                  </button>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>`
+    };
 
-        // Ürünü tüm ürünler listesine ekle
-        secondHandProducts.push(productObj);
-        productsContainer.innerHTML += productObj.html;
-      });
+    // Ürünü tüm ürünler listesine ekle
+    allProducts.push(productObj);
+    tableBody.innerHTML += productObj.html;
+  });
 
-      // Carousel hover efekti ekle
-      addCarouselHoverEffect();
-    }
+  // Carousel hover efekti ekle
+  addCarouselHoverEffect();
+}
+
 
     /**
      * Ürünleri arama terimine göre filtreleyen fonksiyon
      */
     function filterProducts() {
       const searchTerm = document.getElementById("searchInput").value.toLowerCase();
-      const filteredProducts = secondHandProducts.filter(product =>
+      const filteredProducts = allProducts.filter(product =>
         product.name.includes(searchTerm) || product.category.includes(searchTerm)
       );
 
-      const productsContainer = document.getElementById("productsTableBody");
-      productsContainer.innerHTML = ''; // Mevcut ürünleri temizle
+      const tableBody = document.getElementById("productsTableBody");
+      tableBody.innerHTML = ''; // Mevcut ürünleri temizle
 
       filteredProducts.forEach(product => {
-        productsContainer.innerHTML += product.html;
+        tableBody.innerHTML += product.html;
       });
 
       // Carousel hover efekti ekle
@@ -184,7 +187,9 @@
     }
   </script>
 
-
+  <style>
+    /* Genel Gövde ve Navbar Font Ayarları */
+  </style>
 
 </head>
 
@@ -195,7 +200,7 @@
       <div class="d-flex justify-content-center align-items-center w-100 position-relative">
         <!-- Logo -->
         <a class="navbar-brand text-light mx-0" href="/">
-          <img src="/favicon.png" alt="Logo">
+          <img src="/favicon.png" alt="Logo" class="logo">
           <span style="font-size: clamp(14px, 2vw, 20px);">ALLURE ELECTRONIC</span>
         </a>
 
@@ -264,16 +269,44 @@
           </ul>
         </li>
 
+        <!-- Cisco Networks Menüsü -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="cisco-networks.html" id="ciscoNetworksDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Cisco Networks
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="cisco-switches.html">Switches</a></li>
+            <li><a class="dropdown-item" href="cisco-routers.html">Routers</a></li>
+            <li><a class="dropdown-item" href="cisco-access-points.html">Access Points</a></li>
+          </ul>
+        </li>
+
+        <!-- Aruba Networks Menüsü -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="aruba-networks.html" id="arubaNetworksDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Aruba Networks
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="aruba-switches.html">Switches</a></li>
+            <li><a class="dropdown-item" href="aruba-wireless-ap.html">Wireless Access Points</a></li>
+            <li><a class="dropdown-item" href="aruba-network-mgmt.html">Network Management</a></li>
+          </ul>
+        </li>
+
+        <!-- Cisco Systems Menüsü -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="cisco-systems.html" id="ciscoSystemsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Cisco Systems
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="cisco-security.html">Security</a></li>
+            <li><a class="dropdown-item" href="cisco-collaboration.html">Collaboration</a></li>
+            <li><a class="dropdown-item" href="cisco-sdwan.html">SD-WAN & Software-Defined Networking</a></li>
+            <li><a class="dropdown-item" href="cisco-meraki-mx.html">Meraki MX</a></li>
+          </ul>
+        </li>
+
         <!-- Diğer Menüler -->
-        <li class="nav-item">
-          <a class="nav-link" href="cisco-networks.html">Cisco Networks</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="aruba-networks.html">Aruba Networks</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="cisco-systems.html">Cisco Systems</a>
-        </li>
         <li class="nav-item">
           <a class="nav-link" href="2-el-urunler.html">2. El Ürünler</a>
         </li>
@@ -332,16 +365,61 @@
           </ul>
         </li>
 
+        <!-- Cisco Networks Menüsü -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="cisco-networks.html" id="ciscoNetworksDropdownMain" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Cisco Networks
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="cisco-switches.html">Switches</a></li>
+            <li><a class="dropdown-item" href="cisco-routers.html">Routers</a></li>
+            <li><a class="dropdown-item" href="cisco-access-points.html">Access Points</a></li>
+          </ul>
+        </li>
+
+        <!-- Aruba Networks Menüsü -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="aruba-networks.html" id="arubaNetworksDropdownMain" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Aruba Networks
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="aruba-switches.html">Switches</a></li>
+            <li><a class="dropdown-item" href="aruba-wireless-ap.html">Wireless Access Points</a></li>
+            <li><a class="dropdown-item" href="aruba-network-mgmt.html">Network Management</a></li>
+          </ul>
+        </li>
+
+        <!-- Cisco Systems Menüsü -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="cisco-systems.html" id="ciscoSystemsDropdownMain" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Cisco Systems
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="cisco-security.html">Security</a></li>
+            <li><a class="dropdown-item" href="cisco-collaboration.html">Collaboration</a></li>
+            <li><a class="dropdown-item" href="cisco-sdwan.html">SD-WAN & Software-Defined Networking</a></li>
+            <li><a class="dropdown-item" href="cisco-meraki-mx.html">Meraki MX</a></li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="firsat-urunleri.html">Sunucu</a>
+        </li>
+
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="cisco-systems.html" id="ciscoSystemsDropdownMain" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Sunucu Çevre Birimleri
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="sunucuram.html">RAM</a></li>
+            <li><a class="dropdown-item" href="sunucuislemci.html">İşlemci</a></li>
+            <li><a class="dropdown-item" href="sunucuanakart.html">Anakart</a></li>
+            <li><a class="dropdown-item" href="sunucudepolama.html">Depolama</a></li>
+            <li><a class="dropdown-item" href="raidcontroller.html">RAID Controller</a></li>
+            <li><a class="dropdown-item" href="networkcard.html">Network Card</a></li>
+          </ul>
+        </li>
+
         <!-- Diğer Menüler -->
-        <li class="nav-item">
-          <a class="nav-link" href="cisco-networks.html">Cisco Networks</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="aruba-networks.html">Aruba Networks</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="cisco-systems.html">Cisco Systems</a>
-        </li>
         <li class="nav-item">
           <a class="nav-link" href="2-el-urunler.html">2. El Ürünler</a>
         </li>
@@ -354,7 +432,7 @@
 
   <!-- Ürün Listesi -->
   <div class="container mt-5">
-    <h2 class="mb-4 text-center">İkinci El Ürün Listesi</h2>
+    <h2 class="mb-4 text-center">Ürün Listesi</h2>
     <div class="row" id="productsTableBody"></div>
   </div>
 
