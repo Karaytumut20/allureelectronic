@@ -189,169 +189,259 @@
 </head>
 
 <body style="background-color: rgba(227, 222, 222, 0.473);">
-  <!-- Birinci Navbar (ana navbar) -->
-  <nav style="background-color: #f36835;" class="navbar navbar-dark">
-    <div class="container-fluid">
-      <div class="d-flex justify-content-center align-items-center w-100 position-relative">
-        <!-- Logo -->
-        <a class="navbar-brand text-light mx-0" href="/">
-          <img src="/favicon.png" alt="Logo">
-          <span style="font-size: clamp(14px, 2vw, 20px);">ALLURE ELECTRONIC</span>
-        </a>
-
-        <!-- Arama Çubuğu -->
-        <div class="search-bar-container mx-3">
-          <input type="text" id="searchInput" class="form-control search-bar" placeholder="Ürün Ara..." aria-label="Ürün Ara">
-          <i class="fas fa-search search-bar-icon"></i>
+    <!-- Birinci Navbar (ana navbar) -->
+    <nav style="background-color: #f36835;" class="navbar navbar-dark">
+      <div class="container-fluid">
+        <div class="d-flex justify-content-center align-items-center w-100 position-relative">
+          <!-- Logo -->
+          <a class="navbar-brand text-light mx-0" href="/">
+            <img src="/favicon.png" alt="Logo" class="logo">
+            <span style="font-size: clamp(14px, 2vw, 20px);">ALLURE ELECTRONIC</span>
+          </a>
+  
+          <!-- Arama Çubuğu -->
+          <div class="search-bar-container mx-3">
+            <input type="text" id="searchInput" class="form-control search-bar" placeholder="Ürün Ara..." aria-label="Ürün Ara">
+            <i class="fas fa-search search-bar-icon"></i>
+          </div>
+  
+          <!-- "Hakkımızda" Bağlantısı -->
+          <a href="hakkimizda.html" class="btn btn-link text-light mx-3 d-none d-lg-block">Hakkımızda</a>
+  
+          <!-- Navbar Toggler (Mobil Menü) -->
+          <button class="navbar-toggler d-lg-none ms-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
+            <span class="navbar-toggler-icon"></span>
+          </button>
         </div>
-
-        <!-- "Hakkımızda" Bağlantısı -->
-        <a href="hakkimizda.html" class="btn btn-link text-light mx-3 d-none d-lg-block">Hakkımızda</a>
-
-        <!-- Navbar Toggler (Mobil Menü) -->
-        <button class="navbar-toggler d-lg-none ms-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
-          <span class="navbar-toggler-icon"></span>
-        </button>
+      </div>
+    </nav>
+  
+    <!-- Sidebar olarak çalışacak offcanvas -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Kategori Menüsü</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Kapat"></button>
+      </div>
+      <div class="offcanvas-body">
+        <ul class="navbar-nav">
+          <!-- Bilgisayar Menüsü -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="bilgisayar.html" id="bilgisayarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Bilgisayar
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="oyun-bilgisayari.html">Oyun Bilgisayarı</a></li>
+              <li><a class="dropdown-item" href="mini-pc.html">Mini PC</a></li>
+              <li><a class="dropdown-item" href="all-in-one-bilgisayar.html">All in One PC</a></li>
+            </ul>
+          </li>
+  
+          <!-- Laptop Menüsü -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="laptop.html" id="laptopDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Laptop
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="kurumsal-laptop.html">Kurumsal Laptop</a></li>
+              <li><a class="dropdown-item" href="gaming-laptop.html">Gaming Laptop</a></li>
+            </ul>
+          </li>
+  
+          <!-- Çevre Birimleri Menüsü -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="cevreBirimleriDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Çevre Birimleri
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="ram.html">RAM</a></li>
+              <li><a class="dropdown-item" href="islemci.html">İşlemci</a></li>
+              <li><a class="dropdown-item" href="anakart.html">Anakart</a></li>
+              <li><a class="dropdown-item" href="depolama.html">Depolama</a></li>
+              <li><a class="dropdown-item" href="monitör.html">Monitör</a></li>
+              <li><a class="dropdown-item" href="ekran-karti.html">Ekran Kartı</a></li>
+              <li><a class="dropdown-item" href="klavye.html">Klavye</a></li>
+              <li><a class="dropdown-item" href="mause.html">Mouse</a></li>
+            </ul>
+          </li>
+  
+          <!-- Cisco Networks Menüsü -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="cisco-networks.html" id="ciscoNetworksDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Cisco Networks
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="cisco-switches.html">Switches</a></li>
+              <li><a class="dropdown-item" href="cisco-routers.html">Routers</a></li>
+              <li><a class="dropdown-item" href="cisco-access-points.html">Access Points</a></li>
+            </ul>
+          </li>
+  
+          <!-- Aruba Networks Menüsü -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="aruba-networks.html" id="arubaNetworksDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Aruba Networks
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="aruba-switches.html">Switches</a></li>
+              <li><a class="dropdown-item" href="aruba-wireless-ap.html">Wireless Access Points</a></li>
+              <li><a class="dropdown-item" href="aruba-network-mgmt.html">Network Management</a></li>
+            </ul>
+          </li>
+  
+          <!-- Cisco Systems Menüsü -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="cisco-systems.html" id="ciscoSystemsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Cisco Systems
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="cisco-security.html">Security</a></li>
+              <li><a class="dropdown-item" href="cisco-collaboration.html">Collaboration</a></li>
+              <li><a class="dropdown-item" href="cisco-sdwan.html">SD-WAN & Software-Defined Networking</a></li>
+              <li><a class="dropdown-item" href="cisco-meraki-mx.html">Meraki MX</a></li>
+            </ul>
+          </li>
+  
+          <!-- Sunucu Çevre Birimleri Menüsü -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="sunucu.html" id="sunucuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Sunucu
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="sunucuram.html">RAM</a></li>
+              <li><a class="dropdown-item" href="sunucuislemci.html">İşlemci</a></li>
+              <li><a class="dropdown-item" href="sunucuanakart.html">Anakart</a></li>
+              <li><a class="dropdown-item" href="sunucudepolama.html">Depolama</a></li>
+              <li><a class="dropdown-item" href="raidcontroller.html">RAID Controller</a></li>
+              <li><a class="dropdown-item" href="networkcard.html">Network Card</a></li>
+            </ul>
+          </li>
+  
+          <!-- Diğer Menüler -->
+          <li class="nav-item">
+            <a class="nav-link" href="2-el-urunler.html">2. El Ürünler</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="firsat-urunleri.html">Fırsat Ürünleri</a>
+          </li>
+          <!-- "Hakkımızda" Bağlantısı -->
+          <li class="nav-item">
+            <a class="nav-link" href="hakkimizda.html">Hakkımızda</a>
+          </li>
+        </ul>
       </div>
     </div>
-  </nav>
-
-  <!-- Sidebar olarak çalışacak offcanvas -->
-  <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
-    <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Kategori Menüsü</h5>
-      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Kapat"></button>
+  
+    <!-- İkinci Navbar (kategori navbarı, sadece büyük ekranlarda görünür) -->
+    <nav style="background-color: #f3ad35;" class="navbar navbar-expand-lg mt-1" id="secondNavbar">
+      <div class="container-fluid">
+        <ul class="navbar-nav mx-auto">
+          <!-- Bilgisayar Menüsü -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="bilgisayar.html" id="bilgisayarDropdownMain" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Bilgisayar
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="oyun-bilgisayari.html">Oyun Bilgisayarı</a></li>
+              <li><a class="dropdown-item" href="mini-pc.html">Mini PC</a></li>
+              <li><a class="dropdown-item" href="all-in-one-bilgisayar.html">All in One PC</a></li>
+            </ul>
+          </li>
+  
+          <!-- Laptop Menüsü -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="laptop.html" id="laptopDropdownMain" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Laptop
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="kurumsal-laptop.html">Kurumsal Laptop</a></li>
+              <li><a class="dropdown-item" href="gaming-laptop.html">Gaming Laptop</a></li>
+            </ul>
+          </li>
+  
+          <!-- Çevre Birimleri Menüsü -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="cevreBirimleriDropdownMain" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Çevre Birimleri
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="ram.html">RAM</a></li>
+              <li><a class="dropdown-item" href="islemci.html">İşlemci</a></li>
+              <li><a class="dropdown-item" href="anakart.html">Anakart</a></li>
+              <li><a class="dropdown-item" href="depolama.html">Depolama</a></li>
+              <li><a class="dropdown-item" href="monitör.html">Monitör</a></li>
+              <li><a class="dropdown-item" href="ekran-karti.html">Ekran Kartı</a></li>
+              <li><a class="dropdown-item" href="klavye.html">Klavye</a></li>
+              <li><a class="dropdown-item" href="mause.html">Mouse</a></li>
+            </ul>
+          </li>
+  
+          <!-- Cisco Networks Menüsü -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="cisco-networks.html" id="ciscoNetworksDropdownMain" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Cisco Networks
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="cisco-switches.html">Switches</a></li>
+              <li><a class="dropdown-item" href="cisco-routers.html">Routers</a></li>
+              <li><a class="dropdown-item" href="cisco-access-points.html">Access Points</a></li>
+            </ul>
+          </li>
+  
+          <!-- Aruba Networks Menüsü -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="aruba-networks.html" id="arubaNetworksDropdownMain" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Aruba Networks
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="aruba-switches.html">Switches</a></li>
+              <li><a class="dropdown-item" href="aruba-wireless-ap.html">Wireless Access Points</a></li>
+              <li><a class="dropdown-item" href="aruba-network-mgmt.html">Network Management</a></li>
+            </ul>
+          </li>
+  
+          <!-- Cisco Systems Menüsü -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="cisco-systems.html" id="ciscoSystemsDropdownMain" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Cisco Systems
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="cisco-security.html">Security</a></li>
+              <li><a class="dropdown-item" href="cisco-collaboration.html">Collaboration</a></li>
+              <li><a class="dropdown-item" href="cisco-sdwan.html">SD-WAN & Software-Defined Networking</a></li>
+              <li><a class="dropdown-item" href="cisco-meraki-mx.html">Meraki MX</a></li>
+            </ul>
+          </li>
+  
+          <!-- Sunucu Çevre Birimleri Menüsü -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="sunucu.html" id="sunucuDropdownMain" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Sunucu Çevre Birimleri
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="sunucuram.html">RAM</a></li>
+              <li><a class="dropdown-item" href="sunucuislemci.html">İşlemci</a></li>
+              <li><a class="dropdown-item" href="sunucuanakart.html">Anakart</a></li>
+              <li><a class="dropdown-item" href="sunucudepolama.html">Depolama</a></li>
+              <li><a class="dropdown-item" href="raidcontroller.html">RAID Controller</a></li>
+              <li><a class="dropdown-item" href="networkcard.html">Network Card</a></li>
+            </ul>
+          </li>
+  
+          <!-- Diğer Menüler -->
+          <li class="nav-item">
+            <a class="nav-link" href="2-el-urunler.html">2. El Ürünler</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="firsat-urunleri.html">Fırsat Ürünleri</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <!-- Product List -->
+    <div class="container mt-5">
+      <h2 class="mb-4 text-center">Fırsat Ürünleri</h2>
+      <div class="row" id="productsTableBody"></div>
     </div>
-    <div class="offcanvas-body">
-      <ul class="navbar-nav">
-        <!-- Bilgisayar Menüsü -->
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="bilgisayar.html" id="bilgisayarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Bilgisayar
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="oyun-bilgisayari.html">Oyun Bilgisayarı</a></li>
-            <li><a class="dropdown-item" href="mini-pc.html">Mini PC</a></li>
-            <li><a class="dropdown-item" href="all-in-one-bilgisayar.html">All in One PC</a></li>
-          </ul>
-        </li>
-
-        <!-- Laptop Menüsü -->
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="laptop.html" id="laptopDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Laptop
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="kurumsal-laptop.html">Kurumsal Laptop</a></li>
-            <li><a class="dropdown-item" href="gaming-laptop.html">Gaming Laptop</a></li>
-          </ul>
-        </li>
-
-        <!-- Çevre Birimleri Menüsü -->
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="cevreBirimleriDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Çevre Birimleri
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="ram.html">RAM</a></li>
-            <li><a class="dropdown-item" href="islemci.html">İşlemci</a></li>
-            <li><a class="dropdown-item" href="anakart.html">Anakart</a></li>
-            <li><a class="dropdown-item" href="depolama.html">Depolama</a></li>
-            <li><a class="dropdown-item" href="monitör.html">Monitör</a></li>
-            <li><a class="dropdown-item" href="ekran-karti.html">Ekran Kartı</a></li>
-            <li><a class="dropdown-item" href="klavye.html">Klavye</a></li>
-            <li><a class="dropdown-item" href="mause.html">Mouse</a></li>
-          </ul>
-        </li>
-
-        <!-- Diğer Menüler -->
-        <li class="nav-item">
-          <a class="nav-link" href="cisco-networks.html">Cisco Networks</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="aruba-networks.html">Aruba Networks</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="cisco-systems.html">Cisco Systems</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="2-el-urunler.html">2. El Ürünler</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="firsat-urunleri.html">Fırsat Ürünleri</a>
-        </li>
-        <!-- "Hakkımızda" Bağlantısı -->
-        <li class="nav-item">
-          <a class="nav-link" href="hakkimizda.html">Hakkımızda</a>
-        </li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- İkinci Navbar (kategori navbarı, sadece büyük ekranlarda görünür) -->
-  <nav style="background-color: #f3ad35;" class="navbar navbar-expand-lg mt-1" id="secondNavbar">
-    <div class="container-fluid">
-      <ul class="navbar-nav mx-auto">
-        <!-- Bilgisayar Menüsü -->
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="bilgisayar.html" id="bilgisayarDropdownMain" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Bilgisayar
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="oyun-bilgisayari.html">Oyun Bilgisayarı</a></li>
-            <li><a class="dropdown-item" href="mini-pc.html">Mini PC</a></li>
-            <li><a class="dropdown-item" href="all-in-one-bilgisayar.html">All in One PC</a></li>
-          </ul>
-        </li>
-
-        <!-- Laptop Menüsü -->
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="laptop.html" id="laptopDropdownMain" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Laptop
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="kurumsal-laptop.html">Kurumsal Laptop</a></li>
-            <li><a class="dropdown-item" href="gaming-laptop.html">Gaming Laptop</a></li>
-          </ul>
-        </li>
-
-        <!-- Çevre Birimleri Menüsü -->
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="cevreBirimleriDropdownMain" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Çevre Birimleri
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="ram.html">RAM</a></li>
-            <li><a class="dropdown-item" href="islemci.html">İşlemci</a></li>
-            <li><a class="dropdown-item" href="anakart.html">Anakart</a></li>
-            <li><a class="dropdown-item" href="depolama.html">Depolama</a></li>
-            <li><a class="dropdown-item" href="monitör.html">Monitör</a></li>
-            <li><a class="dropdown-item" href="ekran-karti.html">Ekran Kartı</a></li>
-            <li><a class="dropdown-item" href="klavye.html">Klavye</a></li>
-            <li><a class="dropdown-item" href="mause.html">Mouse</a></li>
-          </ul>
-        </li>
-
-        <!-- Diğer Menüler -->
-        <li class="nav-item">
-          <a class="nav-link" href="cisco-networks.html">Cisco Networks</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="aruba-networks.html">Aruba Networks</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="cisco-systems.html">Cisco Systems</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="2-el-urunler.html">2. El Ürünler</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="firsat-urunleri.html">Fırsat Ürünleri</a>
-        </li>
-      </ul>
-    </div>
-  </nav>
-
   <!-- Ürün Listesi -->
   <div class="container mt-5">
     <h2 class="mb-4 text-center">İkinci El Ürün Listesi</h2>
