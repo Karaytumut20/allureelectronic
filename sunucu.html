@@ -38,64 +38,62 @@
     // Tüm ürünleri depolamak için dizi
     let allProducts = [];
 
-    /**
-     * Firebase'den kategorisindeki ürünleri çekip sayfaya ekleyen fonksiyon
-     */
     async function fetchProducts() {
-      const productsCollection = collection(db, "products");
-      // "Çevre Birimleri" kategorisinde ve "RAM" periyferik kısmında olanları filtrele
-      const q = query(productsCollection, 
-                      where("category", "==", "Cisco Systems"), 
-                      where("ciscoSystemsSubCategory", "==", "SD-WAN & Software-Defined Networking"));
-      const querySnapshot = await getDocs(q);
-      const tableBody = document.getElementById("productsTableBody");
-      tableBody.innerHTML = ''; // Mevcut ürünleri temizle
+  const productsCollection = collection(db, "products");
+  const q = query(productsCollection, where("category", "==", "Sunucu"));
 
-      allProducts = []; // Ürünler dizisini sıfırla
+  const querySnapshot = await getDocs(q);
+  const tableBody = document.getElementById("productsTableBody");
+  tableBody.innerHTML = ''; // Mevcut ürünleri temizle
 
-      querySnapshot.forEach((doc) => {
-        const product = doc.data();
-        const productName = product.name || "Bilinmeyen Ürün";
-        const productPrice = product.price ? `${product.price}₺` : "Fiyat Bilinmiyor";
-        const productCategory = product.category || "Kategori: Bilinmiyor";
-        const imageUrls = product.image_urls || [];
-        const ciscoSystemsSubCategory = product.ciscoSystemsSubCategory;
+  allProducts = []; // Ürünler dizisini sıfırla
 
-        // Ürün verilerini içeren obje
-        let productObj = {
-          name: productName.toLowerCase(),
-          category: productCategory.toLowerCase(),
-          html:
-            `<div class="col-lg-3 col-md-4 col-sm-6 mb-4 d-flex align-items-stretch">
-              <div class="card h-100 shadow-sm product-card border-0">
-                <a href="urunDetay.html?id=${doc.id}" class="text-decoration-none text-dark">
-                  <div class="position-relative">
-                    <img src="${imageUrls[0] || 'default-image.jpg'}" class="card-img-top rounded-top" alt="${productName}" style="height: 200px; object-fit: contain;">
-                    <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">${ciscoSystemsSubCategory}</span>
-                  </div>
-                  <div class="card-body d-flex flex-column">
-                    <h5 class="card-title fw-bold">${productName}</h5>
-                    <p class="card-text text-muted mb-2">${productCategory}</p>
-                    <div class="mt-auto">
-                      <p class="card-text fs-5 text-danger">${productPrice}</p>
-                      <button class="btn btn-outline-warning w-100">
-                        Detayları Gör <i class="fas fa-arrow-right ms-2"></i>
-                      </button>
-                    </div>
-                  </div>
-                </a>
+  querySnapshot.forEach((doc) => {
+    const product = doc.data();
+
+    // Ürün detayları
+    const productName = product.name || "Bilinmeyen Ürün";
+    const productPrice = product.price ? `${product.price}₺` : "Fiyat Bilinmiyor";
+    const productCategory = product.category || "Kategori: Bilinmiyor";
+    const imageUrls = product.image_urls || [];
+
+    // Ürün verilerini içeren obje
+    let productObj = {
+      name: productName.toLowerCase(),
+      category: productCategory.toLowerCase(),
+      html:
+        `<div class="col-lg-3 col-md-4 col-sm-6 mb-4 d-flex align-items-stretch">
+          <div class="card h-100 shadow-sm product-card border-0">
+            <a href="urunDetay.html?id=${doc.id}" class="text-decoration-none text-dark">
+              <div class="position-relative">
+                <img src="${imageUrls[0] || 'default-image.jpg'}" class="card-img-top rounded-top" alt="${productName}" style="height: 200px; object-fit: contain;">
+                <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">${productCategory}</span>
               </div>
-            </div>`
-        };
+              <div class="card-body d-flex flex-column">
+                <h5 class="card-title fw-bold">${productName}</h5>
+                <p class="card-text text-muted mb-2">${productCategory}</p>
+                <div class="mt-auto">
+                  <p class="card-text fs-5 text-danger">${productPrice}</p>
+                  <button class="btn btn-outline-warning w-100">
+                    Detayları Gör <i class="fas fa-arrow-right ms-2"></i>
+                  </button>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>`
+    };
 
-        // Ürünü tüm ürünler listesine ekle
-        allProducts.push(productObj);
-        tableBody.innerHTML += productObj.html;
-      });
+    // Ürünü tüm ürünler listesine ekle
+    allProducts.push(productObj);
+    tableBody.innerHTML += productObj.html;
+  });
 
-      // Carousel hover efekti ekle
-      addCarouselHoverEffect();
-    }
+  // Carousel hover efekti ekle
+  addCarouselHoverEffect();
+}
+
+
 
     /**
      * Ürünleri arama terimine göre filtreleyen fonksiyon
