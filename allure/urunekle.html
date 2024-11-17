@@ -13,17 +13,22 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
     import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
-
+// Kullanıcı giriş kontrolü
+if (!localStorage.getItem("isLoggedIn")) {
+    alert("Bu sayfaya erişmek için giriş yapmalısınız.");
+    window.location.href = "admin.html";
+  }
     // Firebase yapılandırma ayarları
     const firebaseConfig = {
-      apiKey: "AIzaSyCYOOa5J3U6k_kVM721xF7LCoxWY6EsE7Q",
-      authDomain: "electronic-b4925.firebaseapp.com",
-      projectId: "electronic-b4925",
-      storageBucket: "electronic-b4925.appspot.com",
-      messagingSenderId: "904593171488",
-      appId: "1:904593171488:web:3a8f5967cad2bd7bbac845",
-      measurementId: "G-BSXFE5FHJV"
-    };
+  apiKey: "AIzaSyDk5oJe3s4VI5FuaxzpDrpXGrB0Sqoyuqs",
+  authDomain: "allureelectronic-4f650.firebaseapp.com",
+  projectId: "allureelectronic-4f650",
+  storageBucket: "allureelectronic-4f650.firebasestorage.app",
+  messagingSenderId: "421386373945",
+  appId: "1:421386373945:web:ec5d1bd87d650d29fdf6e8",
+  measurementId: "G-PKNY3VN43B"
+};
+
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -811,31 +816,51 @@
     document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('addProductButton').addEventListener('click', addProduct);
     });
+
+
+
   </script>
 </head>
 <body>
 
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="../../../index.html">Your Store</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
-        aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse justify-content-center" id="navbarContent">
-        <!-- Ortalanmış Navbar Linkleri -->
-        <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="urunekle.html">Ürün Ekle</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="urunduzenle.html">Ürün Düzenle</a>
-          </li>
-        </ul>
-      </div>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="../../../index.html">Your Store</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-center" id="navbarContent">
+      <!-- Ortalanmış Navbar Linkleri -->
+      <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="urunekle.html">Ürün Ekle</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="urunduzenle.html">Ürün Düzenle</a>
+        </li>
+      </ul>
+      <!-- Çıkış Yap Butonu -->
+      <button class="btn btn-outline-danger" id="logoutButton">Çıkış Yap</button>
     </div>
-  </nav>
+  </div>
+</nav>
+
+<script>
+  // Çıkış yap butonuna tıklandığında
+  document.getElementById("logoutButton").addEventListener("click", function () {
+    // localStorage'dan giriş bilgisini sil
+    localStorage.removeItem("isLoggedIn");
+    
+    // Kullanıcıya çıkış yapıldığını belirten bir mesaj
+    alert("Çıkış yapıldı!");
+
+    // Kullanıcıyı giriş sayfasına yönlendir
+    window.location.href = "admin.html";
+  });
+</script>
+
 
   <!-- Ürün ekleme formu -->
   <div class="container mt-5">
