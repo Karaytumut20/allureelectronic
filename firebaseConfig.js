@@ -1,22 +1,24 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+// Firebase SDK'ları
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// Firebase yapılandırma ayarları
 const firebaseConfig = {
-  apiKey: "AIzaSyCYOOa5J3U6k_kVM721xF7LCoxWY6EsE7Q",
-  authDomain: "electronic-b4925.firebaseapp.com",
-  projectId: "electronic-b4925",
-  storageBucket: "electronic-b4925.appspot.com",
-  messagingSenderId: "904593171488",
-  appId: "1:904593171488:web:3a8f5967cad2bd7bbac845",
-  measurementId: "G-BSXFE5FHJV"
+  apiKey: "AIzaSyDk5oJe3s4VI5FuaxzpDrpXGrB0Sqoyuqs",
+  authDomain: "allureelectronic-4f650.firebaseapp.com",
+  projectId: "allureelectronic-4f650",
+  storageBucket: "allureelectronic-4f650.firebasestorage.app",
+  messagingSenderId: "421386373945",
+  appId: "1:421386373945:web:ec5d1bd87d650d29fdf6e8",
+  measurementId: "G-PKNY3VN43B",
 };
 
-// Initialize Firebase
+// Firebase uygulamasını başlatma
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 
+// Firebase hizmetlerine erişim sağlama
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+export { app, db, auth };

@@ -532,28 +532,15 @@
     });
   </script>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+<script type="module">
+  // Firebase config'i ve firestore importları
+  import { db } from './firebaseConfig.js';  // Firebase config dosyanızdan db'yi import edin
+  import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";  // getDoc ve doc importları
 
-    // Firebase yapılandırması
-    const firebaseConfig = {
-  apiKey: "AIzaSyDk5oJe3s4VI5FuaxzpDrpXGrB0Sqoyuqs",
-  authDomain: "allureelectronic-4f650.firebaseapp.com",
-  projectId: "allureelectronic-4f650",
-  storageBucket: "allureelectronic-4f650.firebasestorage.app",
-  messagingSenderId: "421386373945",
-  appId: "1:421386373945:web:ec5d1bd87d650d29fdf6e8",
-  measurementId: "G-PKNY3VN43B"
-};
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    async function fetchProductDetails() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const productId = urlParams.get('id');
-
+  async function fetchProductDetails() {
+    // URL'den 'id' parametresini al
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
       if (!productId) {
         alert('Ürün bulunamadı.');
         return;

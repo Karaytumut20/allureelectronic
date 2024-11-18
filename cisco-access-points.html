@@ -17,30 +17,13 @@
   <link rel="stylesheet" href="style.css">
   <!-- Firebase Configuration and Scripts -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-
-    // Firebase yapılandırma ayarları
-    const firebaseConfig = {
-  apiKey: "AIzaSyDk5oJe3s4VI5FuaxzpDrpXGrB0Sqoyuqs",
-  authDomain: "allureelectronic-4f650.firebaseapp.com",
-  projectId: "allureelectronic-4f650",
-  storageBucket: "allureelectronic-4f650.firebasestorage.app",
-  messagingSenderId: "421386373945",
-  appId: "1:421386373945:web:ec5d1bd87d650d29fdf6e8",
-  measurementId: "G-PKNY3VN43B"
-};
-
-    // Firebase uygulamasını başlatma
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    import { db } from './firebaseConfig.js';
+    import { collection, getDocs, query } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { where } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
     // Tüm ürünleri depolamak için dizi
     let allProducts = [];
-
-    /**
-     * Firebase'den kategorisindeki ürünleri çekip sayfaya ekleyen fonksiyon
-     */
+  
     async function fetchProducts() {
       const productsCollection = collection(db, "products");
       // "Çevre Birimleri" kategorisinde ve "RAM" periyferik kısmında olanları filtrele
@@ -51,27 +34,32 @@
       const tableBody = document.getElementById("productsTableBody");
       tableBody.innerHTML = ''; // Mevcut ürünleri temizle
 
+  
       allProducts = []; // Ürünler dizisini sıfırla
-
+  
       querySnapshot.forEach((doc) => {
         const product = doc.data();
         const productName = product.name || "Bilinmeyen Ürün";
         const productPrice = product.price ? `${product.price}₺` : "Fiyat Bilinmiyor";
         const productCategory = product.category || "Kategori: Bilinmiyor";
         const imageUrls = product.image_urls || [];
-        const ciscoSubCategory = product.ciscoSubCategory;
-
+        const productPeripheral = product.peripheral;
+  
         // Ürün verilerini içeren obje
         let productObj = {
           name: productName.toLowerCase(),
           category: productCategory.toLowerCase(),
-          html:
-            `<div class="col-lg-3 col-md-4 col-sm-6 mb-4 d-flex align-items-stretch">
+          html: `
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4 d-flex align-items-stretch">
               <div class="card h-100 shadow-sm product-card border-0">
                 <a href="urunDetay.html?id=${doc.id}" class="text-decoration-none text-dark">
                   <div class="position-relative">
                     <img src="${imageUrls[0] || 'default-image.jpg'}" class="card-img-top rounded-top" alt="${productName}" style="height: 200px; object-fit: contain;">
-                    <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">${ciscoSubCategory}</span>
+                    ${
+                      productPeripheral
+                        ? `<span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">${productPeripheral}</span>`
+                        : `<span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">${productCategory}</span>`
+                    }
                   </div>
                   <div class="card-body d-flex flex-column">
                     <h5 class="card-title fw-bold">${productName}</h5>
@@ -85,84 +73,44 @@
                   </div>
                 </a>
               </div>
-            </div>`
+            </div>
+          `,
         };
-
+  
         // Ürünü tüm ürünler listesine ekle
         allProducts.push(productObj);
         tableBody.innerHTML += productObj.html;
       });
-
-      // Carousel hover efekti ekle
-      addCarouselHoverEffect();
+      addCarouselHoverEffect(); // Fetch işlemi sonrasında hover efektlerini ekle
     }
-
-    /**
-     * Ürünleri arama terimine göre filtreleyen fonksiyon
-     */
+  
+    // Ürünleri filtreleme fonksiyonu
     function filterProducts() {
       const searchTerm = document.getElementById("searchInput").value.toLowerCase();
       const filteredProducts = allProducts.filter(product =>
         product.name.includes(searchTerm) || product.category.includes(searchTerm)
       );
-
+  
       const tableBody = document.getElementById("productsTableBody");
-      tableBody.innerHTML = ''; // Mevcut ürünleri temizle
-
+      tableBody.innerHTML = ''; // Mevcut içeriği temizle
+  
       filteredProducts.forEach(product => {
         tableBody.innerHTML += product.html;
       });
-
-      // Carousel hover efekti ekle
-      addCarouselHoverEffect();
+  
+      addCarouselHoverEffect(); // Filtrelenen ürünler için hover efektini ekle
     }
-
-    /**
-     * Carousel hover efektini ekleyen fonksiyon
-     */
+  
+    // Carousel hover efektlerini ekleme fonksiyonu (Boş bir şablon)
     function addCarouselHoverEffect() {
-      document.querySelectorAll('.carousel').forEach(carousel => {
-        let carouselInstance = new bootstrap.Carousel(carousel, {
-          interval: false,
-          ride: false
-        });
-
-        let hoverInterval;
-
-        const cardElement = carousel.closest('.product-card');
-        if (cardElement) {
-          cardElement.addEventListener('mouseenter', () => {
-            if (!hoverInterval) {
-              hoverInterval = setInterval(() => {
-                carouselInstance.next();
-              }, 2000);
-            }
-          });
-
-          cardElement.addEventListener('mouseleave', () => {
-            if (hoverInterval) {
-              clearInterval(hoverInterval);
-              hoverInterval = null;
-            }
-            carouselInstance.to(0);
-          });
-        }
-
-        carousel.querySelectorAll('.carousel-indicators button').forEach((indicator, index) => {
-          indicator.addEventListener('mouseenter', () => {
-            carouselInstance.to(index);
-          });
-        });
-      });
+      // Carousel hover logic buraya eklenebilir
     }
-
-    /**
-     * Ekran boyutuna göre placeholder metnini ayarlayan fonksiyon
-     */
+  
+    // Placeholder metnini ekran boyutuna göre ayarlama fonksiyonu
     function adjustPlaceholder() {
       const searchInput = document.getElementById("searchInput");
       const width = window.innerWidth;
-
+  
       if (width >= 1600) {
         searchInput.placeholder = "Aramak istediğiniz ürünü giriniz...";
       } else if (width >= 1200) {
@@ -173,14 +121,14 @@
         searchInput.placeholder = "Ara...";
       }
     }
-
-    // Sayfa yüklendiğinde çalışacak fonksiyonlar
+  
+    // Sayfa yüklendiğinde yapılacak işlemler
     window.onload = function () {
-      fetchProducts(); // Ürünleri çek
-      document.getElementById("searchInput").addEventListener("input", filterProducts); // Arama çubuğu olayını dinle
+      fetchProducts(); // Ürünleri çek ve göster
+      document.getElementById("searchInput").addEventListener("input", filterProducts); // Arama çubuğu için olay dinleyici ekle
       adjustPlaceholder(); // Placeholder metnini ayarla
       window.addEventListener('resize', adjustPlaceholder); // Ekran boyutu değiştiğinde placeholder'ı ayarla
-    }
+    };
   </script>
 
   <style>

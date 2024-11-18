@@ -33,12 +33,18 @@
   </div>
 
   <script>
-    const validUser = { username: "allure", password: "12345" };
+    async function fetchUserData() {
+      const response = await fetch('users.json');
+      const data = await response.json();
+      return data.validUser;
+    }
 
-    document.getElementById("loginForm").addEventListener("submit", function (e) {
+    document.getElementById("loginForm").addEventListener("submit", async function (e) {
       e.preventDefault();
       const username = document.getElementById("username").value;
       const password = document.getElementById("password").value;
+
+      const validUser = await fetchUserData();
 
       if (username === validUser.username && password === validUser.password) {
         localStorage.setItem("isLoggedIn", true);
